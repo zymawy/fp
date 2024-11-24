@@ -4,8 +4,14 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Tighten\Ziggy\Ziggy;
 
    //\URL::forceSchema('https');
+
+   Route::get('/ziggy', function () {
+    return response()->json((new Ziggy())->toArray());
+    // return response()->json(app(\Tighten\Ziggy\BladeRouteGenerator::class)->generate());
+});
 
 
 Route::get('/', function () {
