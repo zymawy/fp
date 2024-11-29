@@ -1,6 +1,7 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { route as ziggyRoute } from "ziggy-js";
+import axios from "@/lib/axios";
 
 interface ZiggyContextProps {
   ziggyRoutes: any;
@@ -17,10 +18,9 @@ export const ZiggyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
-        const response = await fetch("https://api.enaam.orb.local/ziggy");
-        const routes = await response.json();
-        console.log(routes)
-        setZiggyRoutes(routes);
+        const { data } = await axios.get("routes");
+        console.log(data)
+        setZiggyRoutes(data);
         setIsReady(true);
       } catch (error) {
         console.error("Failed to fetch Ziggy routes:", error);

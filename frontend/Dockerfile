@@ -14,7 +14,7 @@ RUN pnpm install
 COPY . .
 
 # Build the application
-RUN pnpm build
+#RUN pnpm build
 
 # # Use NGINX to serve the application
 # FROM nginx:alpine
@@ -26,5 +26,5 @@ RUN pnpm build
 
 EXPOSE 80
 # CMD ["nginx", "-g", "daemon off;"]
-CMD npm run dev
+CMD pnpm dev
 

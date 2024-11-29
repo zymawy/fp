@@ -1,3 +1,5 @@
+"use client"
+
 import { LabelHTMLAttributes } from 'react';
 
 export default function InputLabel({

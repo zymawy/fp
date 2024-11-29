@@ -91,4 +91,5 @@ RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80/tcp
 
-ENTRYPOINT ["start-container"]
+#ENTRYPOINT ["php artisan"]
+#ENTRYPOINT ["start-container"]

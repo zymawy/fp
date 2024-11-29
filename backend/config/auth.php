@@ -37,9 +37,10 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
+        'jwt' => \Dingo\Api\Auth\Provider\JWT::class,
     ],
 
     /*
