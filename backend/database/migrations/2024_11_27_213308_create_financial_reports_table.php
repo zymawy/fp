@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('financial_reports', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('period'); // e.g., '2024 Q1', '2024 March'
             $table->decimal('total_donations', 10, 2);
             $table->decimal('total_expenditure', 10, 2);

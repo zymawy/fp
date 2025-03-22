@@ -32,10 +32,8 @@ class AppServiceProvider extends ServiceProvider
 
 
         $this->app['Dingo\Api\Transformer\Factory']->setAdapter(function ($app) {
-            $fractal = new \League\Fractal\Manager;
-
-            $fractal->setSerializer(new JsonApiSalonSerializer);
-
+            $fractal = new \PHPOpenSourceSaver\Fractal\Manager();
+            $fractal->setSerializer(new \PHPOpenSourceSaver\Fractal\Serializer\JsonApiSerializer());
             return new \Dingo\Api\Transformer\Adapter\Fractal($fractal, 'with', ',');
         });
 
@@ -51,5 +49,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        
+        // Load Dingo API routes
+        if (file_exists(base_path('routes/dingo-api.php'))) {
+            require base_path('routes/dingo-api.php');
+        }
     }
 }

@@ -2,17 +2,23 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Transformers\UserTransformer;
 use Flugg\Responder\Contracts\Transformable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable  implements Transformable
+class User extends Authenticatable implements Transformable, MustVerifyEmail, JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasUuids, HasFactory, Notifiable, MustVerifyEmailTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +29,10 @@ class User extends Authenticatable  implements Transformable
         'name',
         'email',
         'password',
+        'first_name',
+        'last_name',
+        'avatar_url',
+        'phone_number',
     ];
 
     /**
@@ -48,6 +58,26 @@ class User extends Authenticatable  implements Transformable
         ];
     }
 
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
     public function transformer()
     {
         return UserTransformer::class;
@@ -58,14 +88,14 @@ class User extends Authenticatable  implements Transformable
      * Relationships
      */
 
-    // A user belongs to one role
-    public function role()
+    // A user can have many roles
+    public function roles(): BelongsToMany
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsToMany(Role::class, 'role_user');
     }
 
     // A user can make many donations
-    public function donations()
+    public function donations(): HasMany
     {
         return $this->hasMany(Donation::class);
     }
@@ -78,6 +108,16 @@ class User extends Authenticatable  implements Transformable
 
     public function isAdmin(): bool
     {
-        return $this->role->isAdmin();
+        return $this->roles->contains(function ($role) {
+            return $role->isAdmin();
+        });
+    }
+
+    /**
+     * Get the achievements for the user.
+     */
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(Achievement::class);
     }
 }

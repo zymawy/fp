@@ -3,40 +3,70 @@
 namespace App\Transformers;
 
 use App\Models\User;
-use Flugg\Responder\Transformers\Transformer;
+use PHPOpenSourceSaver\Fractal\TransformerAbstract;
 
-class UserTransformer extends Transformer
+class UserTransformer extends TransformerAbstract
 {
     /**
-     * List of available relations.
+     * List of resources to automatically include
      *
-     * @var string[]
+     * @var array<string>
      */
-    protected $relations = [
-        'role' => RoleTransformer::class,
-        'donations' => DonationTransformer::class,
-        'activityLogs' => UserActivityLogTransformer::class,
-    ];
+    protected array $defaultIncludes = [];
 
     /**
-     * List of autoloaded default relations.
+     * List of resources possible to include
      *
-     * @var array
+     * @var array<string>
      */
-    protected $load = [];
-
+    protected array $availableIncludes = ['donations', 'activities'];
+    
     /**
-     * Transform the model.
+     * Transform a user model
      *
-     * @param  \App\Models\User $user
+     * @param User $user
      * @return array
      */
-    public function transform(User $user)
+    public function transform(User $user): array
     {
         return [
-            'id' => (int) $user->id,
+            'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'role' => $user->role,
+            'created_at' => $user->created_at?->toIso8601String(),
+            'updated_at' => $user->updated_at?->toIso8601String(),
+            // Excluding password and other sensitive fields
         ];
+    }
+    
+    /**
+     * Include Donations
+     *
+     * @param User $user
+     * @return \PHPOpenSourceSaver\Fractal\Resource\Collection|null
+     */
+    public function includeDonations(User $user)
+    {
+        if ($user->relationLoaded('donations')) {
+            return $this->collection($user->donations, new DonationTransformer());
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Include Activities
+     *
+     * @param User $user
+     * @return \PHPOpenSourceSaver\Fractal\Resource\Collection|null
+     */
+    public function includeActivities(User $user)
+    {
+        if ($user->relationLoaded('activities')) {
+            return $this->collection($user->activities, new UserActivityLogTransformer());
+        }
+        
+        return null;
     }
 }

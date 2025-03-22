@@ -1,29 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\ValidateUserRequest;
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Models\FinancialReport;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class FinancialReportController extends Controller
 {
-
-
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = User::query()->get();
+        $financialReports = FinancialReport::query()->paginate();
 
-        return $this->success($users);
+        return $this->success($financialReports);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ValidateUserRequest $request)
+    public function store(Request $request)
     {
         //
     }

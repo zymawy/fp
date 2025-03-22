@@ -11,7 +11,7 @@ class ValidateDonationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true; // Allow all requests temporarily
     }
 
     /**
@@ -22,7 +22,21 @@ class ValidateDonationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'user_id' => 'sometimes|uuid|exists:users,id',
+            'cause_id' => 'required|uuid|exists:causes,id',
+            'amount' => 'required|numeric|min:0.01',
+            'is_anonymous' => 'sometimes|boolean',
+            'total_amount' => 'sometimes|numeric|min:0.01',
+            'cover_fees' => 'sometimes|boolean',
+            'currency_code' => 'sometimes|string|size:3',
+            'gift_message' => 'sometimes|string|max:500',
+            'is_gift' => 'sometimes|boolean',
+            'payment_method_id' => 'sometimes|string',
+            'payment_status' => 'sometimes|string',
+            'processing_fee' => 'sometimes|numeric|min:0',
+            'recipient_email' => 'sometimes|email|max:255',
+            'recipient_name' => 'sometimes|string|max:255',
+            'payment_id' => 'sometimes|string',
         ];
     }
 }

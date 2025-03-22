@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('financial_reports', function (Blueprint $table) {
-            $table->foreignId('cause_id')->constrained('causes')->onDelete('cascade');
+            $table->uuid('cause_id');
+            
+            $table->foreign('cause_id')
+                  ->references('id')
+                  ->on('causes')
+                  ->onDelete('cascade');
         });
     }
 
@@ -21,6 +26,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('financial_reports', function (Blueprint $table) {
+            $table->dropForeign(['cause_id']);
+            $table->dropColumn('cause_id');
+        });
     }
 };

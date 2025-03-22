@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,35 +11,39 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed the roles table first as it's referenced by other tables
         $this->call([
+            // First, seed the roles table
             RolesTableSeeder::class,
-        ]);
-
-        // Seed the users table
-        $this->call([
+            
+            // Then seed users (depends on roles)
             UsersTableSeeder::class,
-        ]);
-
-        // Seed causes
-        $this->call([
+            
+            // Then seed categories and causes
+            CategoriesTableSeeder::class,
             CausesTableSeeder::class,
-        ]);
-
-        // Seed donations
-        $this->call([
+            
+            // Seed achievement types (before achievements)
+            AchievementTypesTableSeeder::class,
+            
+            // Seed partners
+            PartnersTableSeeder::class,
+            
+            // Then seed donations (depends on users and causes)
             DonationsTableSeeder::class,
-        ]);
-
-        // Seed transactions
-        $this->call([
+            
+            // Then seed transactions (depends on donations)
             TransactionsTableSeeder::class,
-        ]);
-
-        // Optionally seed financial reports and activity logs
-        $this->call([
-            FinancialReportsTableSeeder::class,
+            
+            // Seed cause updates (depends on causes)
+            CauseUpdatesTableSeeder::class,
+            
+            // Seed achievements (depends on users and achievement types)
+            AchievementsTableSeeder::class,
+            
+            // Then seed various reports and logs
             UserActivityLogsTableSeeder::class,
+            CauseReportsTableSeeder::class,
+            FinancialReportsTableSeeder::class,
         ]);
     }
 }

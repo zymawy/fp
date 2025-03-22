@@ -2,7 +2,7 @@
 
 namespace App\Serializers;
 
-class JsonApiSalonSerializer extends \League\Fractal\Serializer\JsonApiSerializer
+class JsonApiSalonSerializer extends \PHPOpenSourceSaver\Fractal\Serializer\JsonApiSerializer
 {
     /**
      * {@inheritDoc}

@@ -4,19 +4,23 @@ namespace App\Models;
 
 use App\Casts\Json;
 use App\Transformers\RoleTransformer;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Role extends BaseModel
 {
+    use SoftDeletes;
+    
     public $transformer  = RoleTransformer::class;
 
     /**
      * Relationships
      */
 
-    // A role has many users
-    public function users()
+    // A role can have many users
+    public function users(): BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'role_user');
     }
 
     public function isAdmin()
@@ -33,6 +37,7 @@ class Role extends BaseModel
     {
         return [
             'privileges' => Json::class,
+            'deleted_at' => 'datetime',
         ];
     }
 }

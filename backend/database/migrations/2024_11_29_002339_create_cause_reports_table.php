@@ -12,10 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cause_reports', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('cause_id')->constrained('causes')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('cause_id');
             $table->decimal('total_donations', 10, 2)->default(0);
             $table->timestamps();
+            
+            $table->foreign('cause_id')
+                  ->references('id')
+                  ->on('causes')
+                  ->onDelete('cascade');
         });
     }
 
