@@ -44,7 +44,6 @@ class DatabaseSeeder extends Seeder
             UserActivityLogsTableSeeder::class,
             CauseReportsTableSeeder::class,
             FinancialReportsTableSeeder::class,
-            AchievementTypeSeeder::class,
         ]);
     }
 }

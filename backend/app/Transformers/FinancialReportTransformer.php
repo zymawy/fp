@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\FinancialReport;
-use Flugg\Responder\Transformers\Transformer;
+use PHPOpenSourceSaver\Fractal\TransformerAbstract as Transformer;
 
 class FinancialReportTransformer extends Transformer
 {

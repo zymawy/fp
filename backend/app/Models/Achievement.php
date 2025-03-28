@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Achievement extends Model
 {
@@ -18,12 +17,9 @@ class Achievement extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'user_id',
         'achievement_type_id',
-        'name',
-        'description',
-        'icon',
-        'threshold',
-        'is_active',
+        'achieved_at',
     ];
 
     /**
@@ -32,25 +28,22 @@ class Achievement extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'threshold' => 'integer',
-        'is_active' => 'boolean',
+        'achieved_at' => 'datetime',
     ];
 
     /**
-     * Get the achievement type that owns the achievement.
+     * Get the user that owns the achievement.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the achievement type.
      */
     public function achievementType(): BelongsTo
     {
         return $this->belongsTo(AchievementType::class);
-    }
-
-    /**
-     * Get the users for the achievement.
-     */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_achievements')
-            ->withPivot('awarded_at')
-            ->withTimestamps();
     }
 } 

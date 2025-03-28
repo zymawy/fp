@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\Role;
-use Flugg\Responder\Transformers\Transformer;
+use PHPOpenSourceSaver\Fractal\TransformerAbstract as Transformer;
 
 class RoleTransformer extends Transformer
 {

@@ -14,84 +14,34 @@ class AchievementTypesTableSeeder extends Seeder
      */
     public function run(): void
     {
+        // Check if achievement types already exist
+        if (DB::table('achievement_types')->count() > 0) {
+            $this->command->info('Achievement types already exist. Skipping...');
+            return;
+        }
+
         $achievementTypes = [
             [
-                'id' => Str::uuid()->toString(),
+                'id' => '0195d229-9a72-736f-b605-9005560529eb',
                 'title' => 'First Donation',
-                'description' => 'Made your first donation to a cause.',
-                'icon' => 'fa-hand-holding-heart',
+                'description' => 'Made your first donation',
+                'icon' => 'heart',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id' => Str::uuid()->toString(),
+                'id' => '0195d229-9a8c-738b-a64a-dbbbaa10864e',
                 'title' => 'Generous Donor',
-                'description' => 'Donated more than $500 in total.',
-                'icon' => 'fa-money-bill-wave',
+                'description' => 'Donated more than $1000 in total',
+                'icon' => 'star',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id' => Str::uuid()->toString(),
+                'id' => '0195d229-9a8f-72ed-83cc-2bc762144cab',
                 'title' => 'Regular Supporter',
-                'description' => 'Made donations in three consecutive months.',
-                'icon' => 'fa-calendar-check',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Cause Champion',
-                'description' => 'Donated to the same cause five times.',
-                'icon' => 'fa-trophy',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Diversity Supporter',
-                'description' => 'Donated to causes in five different categories.',
-                'icon' => 'fa-globe',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Profile Completer',
-                'description' => 'Completed 100% of your profile information.',
-                'icon' => 'fa-user-check',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Social Sharer',
-                'description' => 'Shared a cause on social media.',
-                'icon' => 'fa-share-alt',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Milestone Donor',
-                'description' => 'Made your 10th donation.',
-                'icon' => 'fa-flag-checkered',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Yearly Commitment',
-                'description' => 'Donated every month for a full year.',
-                'icon' => 'fa-award',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'title' => 'Impact Multiplier',
-                'description' => 'Referred five friends who made donations.',
-                'icon' => 'fa-users',
+                'description' => 'Made donations in 3 consecutive months',
+                'icon' => 'award',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

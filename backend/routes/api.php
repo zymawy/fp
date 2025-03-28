@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\CentrifugoController;
 use Dingo\Api\Routing\Router;
 
 /** @var Router $api */
@@ -42,7 +43,7 @@ $api->version('v1', [
     $api->get('users/{user}', 'UserController@show')->name('users.show');
 
     // Payment routes - public
-    $api->post('payments/process', 'PaymentController@execute')->name('payments.process');
+    $api->post('payments/process', 'PaymentController@process')->name('payments.process');
     $api->get('payments/{id}/status', 'PaymentController@verifyStatus')->name('payments.status');
     $api->post('payments/webhook', 'PaymentController@webhook')->name('payments.webhook');
     $api->get('payments/callback', 'PaymentController@callback')->name('payments.callback');
@@ -53,11 +54,6 @@ $api->version('v1', [
     $api->get('payment-methods/{id}', 'PaymentMethodController@show')->name('payment-methods.show');
     $api->post('payment-methods/initiate', 'PaymentMethodController@initiatePayment')->name('payment-methods.initiate');
     $api->get('payment-methods/refresh', 'PaymentMethodController@refresh')->name('payment-methods.refresh');
-
-    // MyFatoorah routes - using full class name since it's outside the Api namespace
-    $api->post('payments/embedded', '\App\Http\Controllers\MyFatoorahController@index')->name('payments.embedded');
-    $api->get('payments/success', '\App\Http\Controllers\MyFatoorahController@callback')->name('payments.success');
-    $api->get('payments/failure', '\App\Http\Controllers\MyFatoorahController@error')->name('payments.failure');
 
     // Temporary public access to donations routes - IMPORTANT: Move these behind authentication later
     $api->get('donations', 'DonationController@index')->name('donations.index');
@@ -80,7 +76,7 @@ $api->version('v1', [
         $api->post('upload/avatar', 'UploadController@uploadAvatar')->name('upload.avatar');
 
         // User achievements and statistics
-        $api->get('users/{user}/achievements', 'UserController@achievements')->name('users.achievements');
+        $api->get('/achievements', 'UserController@achievements')->name('users.achievements');
         $api->get('api/users/{user}/achievements', 'UserController@achievements')->name('users.achievements');
         $api->get('users/{user}/statistics', 'UserController@statistics')->name('users.statistics');
         $api->get('api/users/{user}/statistics', 'UserController@statistics')->name('users.statistics');
@@ -92,6 +88,10 @@ $api->version('v1', [
         // Transactions - authenticated operations
         $api->get('transactions', 'TransactionController@index')->name('transactions.index');
         $api->get('transactions/{transaction}', 'TransactionController@show')->name('transactions.show');
+
+        // Centrifugo token endpoints
+        $api->get('centrifugo/tokens', 'CentrifugoController@getTokens')->name('centrifugo.tokens');
+        $api->get('centrifugo/tokens/cause/{causeId}', 'CentrifugoController@getCauseSubscriptionToken')->name('centrifugo.cause.token');
 
         // Admin-only routes
         $api->group(['middleware' => 'admin'], function (Router $api) {

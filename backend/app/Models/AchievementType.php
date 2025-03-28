@@ -17,10 +17,9 @@ class AchievementType extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'title',
         'description',
         'icon',
-        'is_active',
     ];
 
     /**
@@ -28,12 +27,10 @@ class AchievementType extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    protected $casts = [];
 
     /**
-     * Get the achievements for the achievement type.
+     * Get the achievements for this type.
      */
     public function achievements(): HasMany
     {

@@ -19,16 +19,7 @@ class Transaction extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'donation_id',
-        'transaction_id',
-        'payment_provider',
-        'amount',
-        'currency_code',
-        'status',
-        'payment_method',
-        'payment_data',
-    ];
+    protected $guarded = ['id'];
 
     /**
      * The attributes that should be cast.

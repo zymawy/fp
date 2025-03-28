@@ -24,6 +24,7 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->uuid('achievement_type_id');
             $table->timestamp('achieved_at')->useCurrent();
+            $table->timestamps();
             
             $table->foreign('user_id')
                   ->references('id')

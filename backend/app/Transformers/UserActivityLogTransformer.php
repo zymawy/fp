@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\UserActivityLog;
-use Flugg\Responder\Transformers\Transformer;
+use PHPOpenSourceSaver\Fractal\TransformerAbstract as Transformer;
 
 class UserActivityLogTransformer extends Transformer
 {

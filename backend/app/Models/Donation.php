@@ -12,7 +12,7 @@ use App\Transformers\DonationTransformer;
 class Donation extends Model
 {
     use HasFactory, HasUuids;
-    
+
     public $transformer  = DonationTransformer::class;
 
     /**
@@ -37,7 +37,7 @@ class Donation extends Model
         'recipient_name',
         'payment_id',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -51,7 +51,7 @@ class Donation extends Model
         'cover_fees' => 'boolean',
         'is_gift' => 'boolean',
     ];
-    
+
     /**
      * Get the user that owns the donation.
      */
@@ -59,7 +59,7 @@ class Donation extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the cause that owns the donation.
      */
@@ -73,6 +73,6 @@ class Donation extends Model
      */
     public function transaction(): HasOne
     {
-        return $this->hasOne(Transaction::class);
+        return $this->hasOne(Transaction::class, 'donation_id');
     }
 }

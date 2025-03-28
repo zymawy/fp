@@ -49,10 +49,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
-        
-        // Load Dingo API routes
-        if (file_exists(base_path('routes/dingo-api.php'))) {
-            require base_path('routes/dingo-api.php');
-        }
     }
 }

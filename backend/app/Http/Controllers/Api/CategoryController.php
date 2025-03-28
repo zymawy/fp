@@ -8,7 +8,7 @@ use App\Transformers\CategoryTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class CategoryController extends Controller
+class CategoryController extends BaseController
 {
     /**
      * Display a listing of the resource.

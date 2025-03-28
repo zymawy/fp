@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\PartnerResource;
 use App\Models\Partner;
-use Illuminate\Http\JsonResponse;
+use App\Transformers\PartnerTransformer;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class PartnerController extends Controller
+class PartnerController extends BaseController
 {
     /**
      * Check if current user is admin
@@ -32,11 +29,14 @@ class PartnerController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return \Dingo\Api\Http\Response
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $query = Partner::query();
+        
+        // Get requested includes
+        $includes = $this->getRequestedIncludes($request);
         
         // Check if we should include trashed partners
         if ($request->has('withTrashed') && $request->input('withTrashed') === 'true') {
@@ -74,24 +74,16 @@ class PartnerController extends Controller
             }
         }
         
-        return response()->json([
-            'data' => PartnerResource::collection($partners),
-            'meta' => [
-                'total' => $partners->total(),
-                'per_page' => $partners->perPage(),
-                'current_page' => $partners->currentPage(),
-                'last_page' => $partners->lastPage(),
-            ]
-        ]);
+        return $this->respondWithPagination($partners, new PartnerTransformer, 'partners');
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return \Dingo\Api\Http\Response
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $this->checkAdmin();
         
@@ -114,24 +106,20 @@ class PartnerController extends Controller
         
         $partner = Partner::create($data);
         
-        return response()->json([
-            'data' => new PartnerResource($partner)
-        ], 201);
+        return $this->respondWithData($partner, new PartnerTransformer, 'partner', 201);
     }
 
     /**
      * Display the specified resource.
      *
      * @param string $id
-     * @return JsonResponse
+     * @return \Dingo\Api\Http\Response
      */
-    public function show(string $id): JsonResponse
+    public function show(string $id)
     {
         $partner = Partner::findOrFail($id);
         
-        return response()->json([
-            'data' => new PartnerResource($partner)
-        ]);
+        return $this->respondWithData($partner, new PartnerTransformer, 'partner');
     }
 
     /**
@@ -139,9 +127,9 @@ class PartnerController extends Controller
      *
      * @param Request $request
      * @param Partner $partner
-     * @return JsonResponse
+     * @return \Dingo\Api\Http\Response
      */
-    public function update(Request $request, Partner $partner): JsonResponse
+    public function update(Request $request, Partner $partner)
     {
         $this->checkAdmin();
         
@@ -170,19 +158,16 @@ class PartnerController extends Controller
         
         $partner->update($data);
         
-        return response()->json([
-            'success' => true,
-            'data' => new PartnerResource($partner)
-        ]);
+        return $this->respondWithData($partner, new PartnerTransformer, 'partner');
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param Partner $partner
-     * @return JsonResponse
+     * @return \Dingo\Api\Http\Response
      */
-    public function destroy(Partner $partner): JsonResponse
+    public function destroy(Partner $partner)
     {
         $this->checkAdmin();
         
@@ -194,6 +179,6 @@ class PartnerController extends Controller
         
         $partner->delete();
         
-        return response()->json(['message' => 'Partner deleted successfully'], 200);
+        return $this->response->noContent();
     }
 } 

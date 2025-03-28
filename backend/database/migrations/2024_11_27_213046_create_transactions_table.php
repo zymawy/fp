@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('donation_id');
-            $table->string('payment_method');
-            $table->string('payment_status');
+            $table->string('payment_method')->nullable();
+            $table->string('payment_status')->nullable();
             $table->json('payment_data')->nullable();
-            $table->string('transaction_id')->unique();
+            $table->string('transaction_id')->unique()->nullable();
             $table->timestamp('timestamp')->nullable();
             $table->timestamps();
             $table->softDeletes();
