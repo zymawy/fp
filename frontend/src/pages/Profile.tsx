@@ -231,13 +231,6 @@ export default function Profile() {
                   >
                     <Download className={isRtl ? "h-4 w-4 ml-2" : "h-4 w-4 mr-2"} /> {t('profile.certificates')}
                   </Button>
-                  <Button
-                    variant={activeTab === 'settings' ? 'default' : 'ghost'}
-                    className="w-full justify-start"
-                    onClick={() => setActiveTab('settings')}
-                  >
-                    <Settings className={isRtl ? "h-4 w-4 ml-2" : "h-4 w-4 mr-2"} /> {t('profile.settings')}
-                  </Button>
                 </nav>
               </CardContent>
             </Card>

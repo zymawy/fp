@@ -123,34 +123,8 @@ export async function executePayment({
       language: i18next.language || 'en',
       displayCurrencyIso: currency,
       customerReference: causeId, // Use cause ID as customer reference
-      invoiceItems: invoiceItems
-    };
-
-    console.log('Executing payment with data:', paymentData);
-    const response = await fetchApi<any>('/payments/process', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(paymentData)
-    });
-    
-    // Check if response is valid
-    if (!response || response.error) {
-      throw new Error(response?.error?.message || 'Payment execution failed');
-    }
-    
-    // Extract the real payment ID from the response
-    const invoiceId = response.data?.invoiceId || response.data?.paymentId || response.invoiceId || response.paymentId;
-    
-    // Step 2: Now create a donation record with the real payment ID
-    if (causeId && (amount || 0) > 0 && invoiceId) {
-      console.log('Creating donation with real invoice ID:', invoiceId);
-      
-      // Format donation data according to Laravel API expectations
-      const donationData = {
-        cause_id: causeId,
+      invoiceItems: invoiceItems,
+      cause_id: causeId,
         user_id: userId || '',
         amount: amount || 0,
         total_amount: amount || 0,
@@ -163,44 +137,87 @@ export async function executePayment({
         processing_fee: processingFee || 0,
         payment_method_id: paymentMethod,
         currency_code: currencyIso || 'USD',
-        payment_status: 'pending', // Initial status is pending
-        payment_id: invoiceId // Use the real invoice ID from the payment
-      };
+        payment_status: 'pending',
+    };
+
+    console.log('Executing payment with data:', paymentData);
+    const responseData = await fetchApi<any>('/payments/process', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(paymentData)
+    });
+    
+    const response = responseData.data;
+    // Check if response is valid
+    if (!response || response.error) {
+      throw new Error(response?.error?.message || 'Payment execution failed');
+    }
+    
+    // Extract the real payment ID from the response
+    const invoiceId = response.invoice_id || response.paymentId;
+    
+    console.log('Creating donation with real invoice ID:', invoiceId);
+      console.log('response.data', response.data);
       
-      // Use properly formatted headers for the donation request
-      const donationResponse = await fetchApi<any>('/donations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(donationData)
-      });
+    // Step 2: Now create a donation record with the real payment ID
+    if (causeId && (amount || 0) > 0 && invoiceId) {
       
-      console.log('Donation creation response:', donationResponse);
+      // Format donation data according to Laravel API expectations
+      // const donationData = {
+      //   cause_id: causeId,
+      //   user_id: userId || '',
+      //   amount: amount || 0,
+      //   total_amount: amount || 0,
+      //   is_anonymous: isAnonymous || false,
+      //   is_gift: isGift || false,
+      //   recipient_name: recipientName || null,
+      //   recipient_email: recipientEmail || null,
+      //   gift_message: giftMessage || null,
+      //   cover_fees: coverFees || false,
+      //   processing_fee: processingFee || 0,
+      //   payment_method_id: paymentMethod,
+      //   currency_code: currencyIso || 'USD',
+      //   payment_status: 'pending', // Initial status is pending
+      //   payment_id: invoiceId // Use the real invoice ID from the payment
+      // };
       
-      if (donationResponse && !donationResponse.error) {
-        // Handle Laravel API response format which might include data wrapper
-        const donationId = donationResponse.data?.id || donationResponse.id;
-        console.log('Created donation with ID:', donationId);
+      // // Use properly formatted headers for the donation request
+      // const donationResponse = await fetchApi<any>('/donations', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Accept': 'application/json'
+      //   },
+      //   body: JSON.stringify(donationData)
+      // });
+      
+      // console.log('Donation creation response:', donationResponse);
+      
+      // if (donationResponse && !donationResponse.error) {
+      //   // Handle Laravel API response format which might include data wrapper
+      //   const donationId = donationResponse.data?.id || donationResponse.id;
+      //   console.log('Created donation with ID:', donationId);
         
         // Update the callback URL with donation ID
-        if (donationId && response.PaymentURL && response.PaymentURL.includes('?')) {
-          response.PaymentURL += `&donationId=${donationId}`;
-        } else if (donationId && response.PaymentURL) {
-          response.PaymentURL += `?donationId=${donationId}`;
-          response.data
-        }
-      } else {
-        // Log any error from donation creation
-        console.error('Failed to create donation:', donationResponse?.error || 'Unknown error');
-      }
+        // if (response.data && response.PaymentURL && response.PaymentURL.includes('?')) {
+        //   response.PaymentURL += `&donationId=${donationId}`;
+        // } else if (donationId && response.PaymentURL) {
+        
+          window.location.href = response.payment_url += `&donationId=${response.donation_id}`;
+
+      // } else {
+      //   // Log any error from donation creation
+      //   console.error('Failed to create donation:', donationResponse?.error || 'Unknown error');
+      // }
     } else {
       console.error('Cannot create donation - missing required fields', { causeId, amount, invoiceId });
     }
     
     // Return the payment data for redirection
-    return response.data || response;
+    // return response.data || response;
   } catch (error) {
     console.error('Payment execution error:', error);
     throw error;

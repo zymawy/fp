@@ -121,7 +121,11 @@ export async function fetchApi<T>(
   const token = localStorage.getItem('token');
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-    console.log('Adding auth token to request');
+    // Log the auth token (masked for security) for debugging
+    const maskedToken = token.length > 10 
+      ? `${token.substring(0, 5)}...${token.substring(token.length - 5)}`
+      : '***masked***';
+    console.log(`Adding auth token to request: Bearer ${maskedToken}`);
   } else {
     console.log('No auth token available');
   }
@@ -788,7 +792,12 @@ export const api = {
     getUserDonations: async () => {
       try {
         // Get the current authenticated user
-        const userString = localStorage.getItem('user');
+        const userString = localStorage.getItem('session');
+        
+        // Debug: Check localStorage keys
+        console.log('All localStorage keys:', Object.keys(localStorage));
+        console.log('session from localStorage:', userString);
+        
         let userId = '';
         
         if (userString) {
@@ -806,9 +815,13 @@ export const api = {
           return [];
         }
         
-        // Attempt to fetch from the API with the user ID parameter
+        // Use the /donations endpoint directly, which should return current user's donations
+        // when authenticated with the Bearer token
         console.log(`Fetching donations for user ID: ${userId}`);
-        const response = await fetchApi<any>(`/users/${userId}/donations`);
+        const endpoint = '/donations';
+        console.log(`API endpoint: ${endpoint}`);
+        console.log(`Full URL will be: ${API_BASE_URL}${endpoint}`);
+        const response = await fetchApi<any>(endpoint);
         
         console.log('API response for donations (RAW):', JSON.stringify(response, null, 2));
         console.log('API response for donations:', response);
@@ -861,8 +874,33 @@ export const api = {
   achievements: {
     list: async () => {
       try {
-        const response = await fetchApi<{ data: any[] }>('/achievements');
-        return response?.data || [];
+        console.log('Fetching user achievements');
+        
+        // Get the current user ID
+        const userString = localStorage.getItem('session');
+        let userId = '';
+        
+        if (userString) {
+          try {
+            const user = JSON.parse(userString);
+            userId = user.id;
+            console.log('Found user ID for achievements:', userId);
+          } catch (e) {
+            console.error('Failed to parse user from localStorage', e);
+          }
+        }
+        
+        // Use the achievements endpoint
+        const endpoint = '/achievements';
+        console.log(`Using endpoint: ${endpoint}`);
+        
+        const response = await fetchApi<any>(endpoint);
+        
+        console.log('Achievements API response (raw):', JSON.stringify(response, null, 2));
+        console.log('Achievements API response:', response);
+        
+        // Return the response directly so the hook can process it
+        return response;
       } catch (error) {
         console.error('Error fetching achievements:', error);
         return [];

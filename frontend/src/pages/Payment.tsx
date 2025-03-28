@@ -216,7 +216,7 @@ export default function Payment() {
         customerEmail: user.email,
         customerPhone: user.phoneNumber || undefined,
         paymentMethod,
-        callbackUrl: `${window.location.origin}${t('routes.paymentSuccess')}`,
+        callbackUrl: `${window.location.origin}/payment/success`,
         errorUrl: `${window.location.origin}${t('routes.paymentError')}`,
         currencyIso: currencyCode, // Pass the currency code
         // Additional donation options
@@ -231,46 +231,49 @@ export default function Payment() {
         userId: user.id, // From auth context
       });
 
-      console.log(t('payment.logs.paymentExecuted'), response);
+    //   console.log(t('payment.logs.paymentExecuted'), response);
       
-      // Check if the response has a PaymentURL property
-      if (response && response.PaymentURL) {
-        // Log the URL we're redirecting to
-        console.log(t('payment.logs.redirectingUrl'), response.PaymentURL);
+    //   const { data: responseData } = response;
+
+    //   console.log(t('payment.logs.paymentExecuted'), responseData);
+    //   // Check if the response has a PaymentURL property
+    //   if (responseData && responseData.PaymentURL) {
+    //     // Log the URL we're redirecting to
+    //     console.log(t('payment.logs.redirectingUrl'), responseData.PaymentURL);
         
-        // Get the invoice ID for reference
-        const invoiceId = response.InvoiceId || response.PaymentId;
-        console.log(t('payment.logs.invoiceId'), invoiceId);
+    //     // Get the invoice ID for reference
+    //     const invoiceId = responseData.InvoiceId || responseData.PaymentId;
+    //     console.log(t('payment.logs.invoiceId'), invoiceId);
         
-        // Redirect to MyFatoorah payment page
-        window.location.href = response.PaymentURL + '&invoiceId=' + invoiceId;
-      } else {
-        // Log detailed information about the response
-        console.error(t('payment.logs.invalidResponse'), response);
-        throw new Error(t('payment.errors.missingPaymentUrl'));
-      }
-    } catch (error) {
-      console.error(t('payment.logs.submissionFailed'), error);
+    //     // Redirect to MyFatoorah payment page
+    //     window.location.href = responseData.PaymentURL + '&invoiceId=' + invoiceId;
+    //   } else {
+    //     // Log detailed information about the response
+    //     console.error(t('payment.logs.invalidResponse'), response);
+    //     throw new Error(t('payment.errors.missingPaymentUrl'));
+    //   }
+    // } catch (error) {
+    //   console.error(t('payment.logs.submissionFailed'), error);
       
-      // Provide a more specific error message based on the error
-      let errorMessage = '';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        // Check for specific error patterns to provide better user guidance
-        if (error.message.includes(t('payment.errors.invalidResponse'))) {
-          errorMessage = t('payment.urlMissingError');
-        } else if (error.message.includes(t('payment.errors.networkError'))) {
-          errorMessage = t('payment.networkError');
-        }
-      } else {
-        errorMessage = t('payment.errorDescription');
-      }
+    //   // Provide a more specific error message based on the error
+    //   let errorMessage = '';
+    //   if (error instanceof Error) {
+    //     errorMessage = error.message;
+    //     // Check for specific error patterns to provide better user guidance
+    //     if (error.message.includes(t('payment.errors.invalidResponse'))) {
+    //       errorMessage = t('payment.urlMissingError');
+    //     } else if (error.message.includes(t('payment.errors.networkError'))) {
+    //       errorMessage = t('payment.networkError');
+    //     }
+    //   } else {
+    //     errorMessage = t('payment.errorDescription');
+    //   }
       
-      toast({
-        variant: "destructive",
-        title: t('payment.errorTitle'),
-        description: errorMessage,
-      });
+    //   toast({
+    //     variant: "destructive",
+    //     title: t('payment.errorTitle'),
+    //     description: errorMessage,
+    //   });
     } finally {
       setLoading(false);
     }

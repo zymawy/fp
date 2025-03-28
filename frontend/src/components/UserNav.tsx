@@ -24,7 +24,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatars/01.png" alt={user?.email} />
+            <AvatarImage src={user?.avatar_url || '/avatars/01.png'} alt={user?.email} />
             <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
@@ -41,9 +41,6 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/profile">{t('nav.profile')}</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/settings">{t('common.settings', 'Settings')}</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

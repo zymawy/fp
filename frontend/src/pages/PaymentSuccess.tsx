@@ -184,37 +184,37 @@ export default function PaymentSuccess() {
       console.log('Processing successful donation for certificate:', donationData);
       
       // Check if the data is in JSON:API format with nested attributes
-      const attributes = donationData.attributes || donationData;
+      // const attributes = donationData.attributes || donationData;
       
     
       // Adapt to both camelCase and snake_case field names for compatibility
-      const paymentStatus = attributes.payment_status || attributes.paymentStatus;
-      const isGift = attributes.is_gift || attributes.isGift;
-      const recipientName = attributes.user.name || attributes.recipient_name || attributes.recipientName;
-      const causeId = attributes.cause_id || attributes.causeId;
-      const amount = attributes.amount;
-      const currencyCode = attributes.currency_code || attributes.currencyCode || 'USD';
-      const createdAt = attributes.created_at || attributes.createdAt;
-      const donationId = donationData.id || (donationData.data?.id) || attributes.id;
+      // const paymentStatus = attributes.payment_status || attributes.paymentStatus;
+      // const isGift = attributes.is_gift || attributes.isGift;
+      // const recipientName = attributes.user.name || attributes.recipient_name || attributes.recipientName;
+      // const causeId = attributes.cause_id || attributes.causeId;
+      // const amount = attributes.amount;
+      // const currencyCode = attributes.currency_code || attributes.currencyCode || 'USD';
+      // const createdAt = attributes.created_at || attributes.createdAt;
+      // const donationId = donationData.id || (donationData.data?.id) || attributes.id;
       
       // If we have donation data and it was paid, generate a certificate
-      if (attributes && (paymentStatus === 'completed')) {
-        const certificateResponse = await generateCertificate({
-          donationId: donationId,
-          causeId: causeId,
-          amount: amount,
-          currencyCode: currencyCode,
-          userName: isGift ? 
-            (recipientName || t('payment.anonymousDonor')) : 
-            (user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : (recipientName || t('payment.anonymousDonor'))),
-          date: new Date(createdAt).toISOString(),
-          isGift: isGift
-        });
+      // if (attributes && (paymentStatus === 'completed')) {
+      //   const certificateResponse = await generateCertificate({
+      //     donationId: donationId,
+      //     causeId: causeId,
+      //     amount: amount,
+      //     currencyCode: currencyCode,
+      //     userName: isGift ? 
+      //       (recipientName || t('payment.anonymousDonor')) : 
+      //       (user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : (recipientName || t('payment.anonymousDonor'))),
+      //     date: new Date(createdAt).toISOString(),
+      //     isGift: isGift
+      //   });
         
-        if (certificateResponse) {
-          setCertificate(certificateResponse);
-        }
-      }
+      //   if (certificateResponse) {
+      //     setCertificate(certificateResponse);
+      //   }
+      // }
     } catch (error) {
       console.error('Certificate generation error:', error);
       toast({
