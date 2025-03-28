@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'myfatoorah' => [
+        'api_token' => env('MYFATOORAH_API_TOKEN'),
+        'is_test' => env('MYFATOORAH_TEST_MODE', true),
+        'country_iso' => env('MYFATOORAH_COUNTRY_ISO', 'KWT'),
+        'display_currency' => env('MYFATOORAH_DISPLAY_CURRENCY', 'USD'),
+    ],
+
 ];

@@ -16,11 +16,12 @@ return new class extends Migration
             $table->uuid('donation_id');
             $table->string('payment_method');
             $table->string('payment_status');
+            $table->json('payment_data')->nullable();
             $table->string('transaction_id')->unique();
             $table->timestamp('timestamp')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->foreign('donation_id')
                   ->references('id')
                   ->on('donations')
