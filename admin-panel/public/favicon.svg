@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Heart icon representing caring and fundraising -->
+  <path d="M25 40C22.5 37.5 15 31 10 25C5 19 5 15 5 12.5C5 7.5 8.5 5 12.5 5C16.5 5 20 7.5 25 12.5C30 7.5 33.5 5 37.5 5C41.5 5 45 7.5 45 12.5C45 15 45 19 40 25C35 31 27.5 37.5 25 40Z" fill="#004E5B"/>
+  
+  <!-- E for ENAAM -->
+  <path d="M22 20H28V23H22V20Z" fill="white"/>
+  <path d="M22 24H26V27H22V24Z" fill="white"/>
+  <path d="M22 28H28V31H22V28Z" fill="white"/>
+</svg> 
