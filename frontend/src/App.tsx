@@ -14,39 +14,42 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import TranslationProvider from './components/TranslationProvider';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { CentrifugoProvider } from './contexts/CentrifugoContext';
 
 function App() {
   return (
     <ErrorBoundary>
       <TranslationProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/causes" element={<Causes />} />
-            <Route path="/causes/:id" element={<CauseDetail />} />
-            <Route path="/causes/:id/donate" element={
-              <ProtectedRoute>
-                <Payment />
-              </ProtectedRoute>
-            } />
-            <Route path="/payment/success" element={<PaymentSuccess />} />
-            <Route path="/payment/error" element={<PaymentError />} />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="/certificates/:id" element={
-              <ProtectedRoute>
-                <Certificate />
-              </ProtectedRoute>
-            } />
-          </Routes>
-          <Toaster />
-        </Router>
+        <CentrifugoProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/causes" element={<Causes />} />
+              <Route path="/causes/:id" element={<CauseDetail />} />
+              <Route path="/causes/:id/donate" element={
+                <ProtectedRoute>
+                  <Payment />
+                </ProtectedRoute>
+              } />
+              <Route path="/payment/success" element={<PaymentSuccess />} />
+              <Route path="/payment/error" element={<PaymentError />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/certificates/:id" element={
+                <ProtectedRoute>
+                  <Certificate />
+                </ProtectedRoute>
+              } />
+            </Routes>
+            <Toaster />
+          </Router>
+        </CentrifugoProvider>
       </TranslationProvider>
     </ErrorBoundary>
   );
