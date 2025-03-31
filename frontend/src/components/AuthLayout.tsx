@@ -19,7 +19,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b dark:border-gray-800">
         <div className="max-w-[1400px] mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold text-primary dark:text-white">{t('app.name')}</Link>
+          <Link to="/" className="flex items-center">
+            <img src="/logo.svg" alt="Enaam" className="h-8" />
+          </Link>
           <nav className="flex items-center gap-4 sm:gap-8">
             <Link to="/causes" className="text-sm font-medium hover:text-primary transition-colors">
               {t('nav.causes')}

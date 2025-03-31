@@ -13,7 +13,9 @@ export function MainNav() {
   return (
     <header className="sticky top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md z-50 border-b dark:border-gray-800">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold text-primary">{t('app.name')}</Link>
+        <Link to="/" className="flex items-center">
+          <img src="/logo.svg" alt="Enaam" className="h-8" />
+        </Link>
         <nav className="flex items-center gap-4 sm:gap-8">
           <Link to="/causes" className="text-sm font-medium hover:text-primary transition-colors">
             {t('nav.causes')}

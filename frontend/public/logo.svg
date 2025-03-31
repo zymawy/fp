@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Heart icon representing caring and fundraising -->
+  <path d="M25 40C22.5 37.5 15 31 10 25C5 19 5 15 5 12.5C5 7.5 8.5 5 12.5 5C16.5 5 20 7.5 25 12.5C30 7.5 33.5 5 37.5 5C41.5 5 45 7.5 45 12.5C45 15 45 19 40 25C35 31 27.5 37.5 25 40Z" fill="#004E5B"/>
+  
+  <!-- Text: ENAAM -->
+  <path d="M60 15H65V35H60V15Z" fill="#004E5B"/> <!-- E -->
+  <path d="M60 15H75V20H60V15Z" fill="#004E5B"/>
+  <path d="M60 23H70V28H60V23Z" fill="#004E5B"/>
+  <path d="M60 30H75V35H60V30Z" fill="#004E5B"/>
+  
+  <path d="M80 15H85V35H80V15Z" fill="#004E5B"/> <!-- N -->
+  <path d="M80 15H95V20H80V15Z" fill="#004E5B"/>
+  <path d="M90 15H95V35H90V15Z" fill="#004E5B"/>
+  
+  <path d="M100 15H115V20H100V15Z" fill="#004E5B"/> <!-- A -->
+  <path d="M100 23H115V28H100V23Z" fill="#004E5B"/>
+  <path d="M100 15H105V35H100V15Z" fill="#004E5B"/>
+  <path d="M110 15H115V35H110V15Z" fill="#004E5B"/>
+  
+  <path d="M120 15H135V20H120V15Z" fill="#004E5B"/> <!-- A -->
+  <path d="M120 23H135V28H120V23Z" fill="#004E5B"/>
+  <path d="M120 15H125V35H120V15Z" fill="#004E5B"/>
+  <path d="M130 15H135V35H130V15Z" fill="#004E5B"/>
+  
+  <path d="M140 15H145V35H140V15Z" fill="#004E5B"/> <!-- M -->
+  <path d="M140 15H160V20H140V15Z" fill="#004E5B"/>
+  <path d="M155 15H160V35H155V15Z" fill="#004E5B"/>
+  <path d="M147 15H153V28H147V15Z" fill="#004E5B"/>
+  
+  <!-- Connecting line between heart and text to symbolize connection -->
+  <path d="M45 25H58" stroke="#004E5B" stroke-width="2"/>
+</svg> 
