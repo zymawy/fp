@@ -885,7 +885,7 @@ export const api = {
         // Use the /donations endpoint directly, which should return current user's donations
         // when authenticated with the Bearer token
         console.log(`Fetching donations for user ID: ${userId}`);
-        const endpoint = '/donations';
+        const endpoint = '/donations?user_id=' + userId;
         console.log(`API endpoint: ${endpoint}`);
         console.log(`Full URL will be: ${API_BASE_URL}${endpoint}`);
         const response = await fetchApi<any>(endpoint);

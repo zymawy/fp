@@ -39,8 +39,7 @@ export default function Home() {
   // Use the useCauses hook for regular causes
   const { causes, hasMore, loading: causesLoading, initialLoading, loadMore } = useCauses();
   
-  // Use the fetched causes or empty array if nothing is returned
-  const displayedCauses = causes.length > 0 ? causes : [];
+  const displayedCauses = causes.length > 0 ? causes.slice(0, 4) : [];
   
   // Check RTL direction
   const isRtl = i18n.language === 'ar';
@@ -276,32 +275,19 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <InfiniteScroll
-                next={loadMore}
-                hasMore={hasMore}
-                isLoading={causesLoading}
-                threshold={0.5}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                  {displayedCauses.map((cause) => (
-                    <CauseCard key={cause.id} cause={cause} />
-                  ))}
-                </div>
-              </InfiniteScroll>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                {displayedCauses.map((cause) => (
+                  <CauseCard key={cause.id} cause={cause} />
+                ))}
+              </div>
               
-              {causesLoading && (
+              {initialLoading && (
                 <div className="flex justify-center mt-10">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
                 </div>
               )}
               
-              {!causesLoading && !hasMore && displayedCauses.length > 0 && (
-                <p className="text-center text-muted-foreground py-6 mt-4">
-                  {t('common.noMoreItems')}
-                </p>
-              )}
-              
-              {!causesLoading && displayedCauses.length === 0 && (
+              {!initialLoading && displayedCauses.length === 0 && (
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-10 text-center my-8">
                   <h3 className="text-xl font-medium mb-4">No causes found</h3>
                   <p className="text-muted-foreground mb-6">We couldn't find any causes matching your criteria.</p>

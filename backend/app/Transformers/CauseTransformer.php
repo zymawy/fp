@@ -20,7 +20,7 @@ class CauseTransformer extends TransformerAbstract
      * @var array<string>
      */
     protected array $availableIncludes = ['partner', 'donations', 'updates'];
-    
+
     /**
      * Transform a cause model
      *
@@ -34,35 +34,38 @@ class CauseTransformer extends TransformerAbstract
             'title' => $cause->title,
             'slug' => $cause->slug,
             'description' => $cause->description,
-            'image' => $cause->image,
+            'image' => $cause->media_url,
             'goal_amount' => (float) $cause->goal_amount,
             'raised_amount' => (float) $cause->raised_amount,
             'start_date' => $cause->start_date?->toIso8601String(),
             'end_date' => $cause->end_date?->toIso8601String(),
             'status' => $cause->status,
             'category_id' => $cause->category_id,
+            'category_name' => $cause->category_id ?  $cause->category->name : null,
             'partner_id' => $cause->partner_id,
             'is_featured' => (bool) $cause->is_featured,
             'is_active' => (bool) $cause->is_active,
             'created_at' => $cause->created_at?->toIso8601String(),
             'updated_at' => $cause->updated_at?->toIso8601String(),
         ];
-        
+
         // Include donation summary if the relationship is loaded
         if ($cause->relationLoaded('donations')) {
             $data['donations_count'] = $cause->donations->count();
-            $data['unique_donors'] = $cause->donations->pluck('user_id')->unique()->count();
+            $data['donors_count'] = $cause->donations->pluck('user_id')->unique()->count();
+            // Keep unique_donors for backward compatibility
+            $data['unique_donors'] = $data['donors_count'];
         }
-        
+
         // Include updates summary if the relationship is loaded
         if ($cause->relationLoaded('updates')) {
             $data['updates_count'] = $cause->updates->count();
             $data['latest_update'] = $cause->updates->sortByDesc('created_at')->first()?->created_at?->toIso8601String();
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Include Category
      *
@@ -81,7 +84,7 @@ class CauseTransformer extends TransformerAbstract
             });
         }
     }
-    
+
     /**
      * Include Partner
      *
@@ -102,7 +105,7 @@ class CauseTransformer extends TransformerAbstract
             });
         }
     }
-    
+
     /**
      * Include Donations
      *
@@ -124,7 +127,7 @@ class CauseTransformer extends TransformerAbstract
             });
         }
     }
-    
+
     /**
      * Include Updates
      *

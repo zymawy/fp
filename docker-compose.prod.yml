@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  ui:
+    build:
+      context: ./frontend
+      target: runner  # Use the production stage
+    ports:
+      - '${ENAAM_UI_PORT:-80}:80'
+    # No volumes mounted in production
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge 

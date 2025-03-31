@@ -60,7 +60,11 @@ class DonationController extends BaseController
             }
         }
 
+        $user = auth()->user();
+
+
         $query = Donation::query()->with($relationships);
+
 
         // Apply filters
         // Filter by user
@@ -256,7 +260,7 @@ class DonationController extends BaseController
 
     /**
      * Send real-time donation update for a cause
-     * 
+     *
      * @param string $causeId The ID of the cause to update
      * @return bool Success status
      */
@@ -265,25 +269,25 @@ class DonationController extends BaseController
         try {
             // Get the latest cause data
             $cause = \App\Models\Cause::findOrFail($causeId);
-            
+
             // Calculate progress percentage
-            $progressPercentage = $cause->target_amount > 0 
-                ? min(100, round(($cause->raised_amount / $cause->target_amount) * 100)) 
+            $progressPercentage = $cause->target_amount > 0
+                ? min(100, round(($cause->raised_amount / $cause->target_amount) * 100))
                 : 0;
-            
+
             // Broadcast the event using Laravel's event system
             event(new DonationUpdated(
                 $causeId,
                 (float)$cause->raised_amount,
                 (float)$progressPercentage
             ));
-            
+
             \Log::info('Real-time donation update broadcast successfully', [
                 'cause_id' => $causeId,
                 'raised_amount' => $cause->raised_amount,
                 'progress_percentage' => $progressPercentage
             ]);
-            
+
             return true;
         } catch (\Exception $e) {
             \Log::error('Exception when broadcasting donation update', [
@@ -294,7 +298,7 @@ class DonationController extends BaseController
             return false;
         }
     }
-    
+
     /**
      * Handle payment callback from payment processor
      *
@@ -304,16 +308,16 @@ class DonationController extends BaseController
     public function paymentCallback(Request $request)
     {
         $paymentId = $request->input('paymentId');
-        
+
         try {
             $paymentStatus = $this->myFatoorahService->getPaymentStatus($paymentId);
-            
+
             // Find donation by payment ID
             $donation = Donation::where('payment_id', $paymentId)->firstOrFail();
-            
+
             // Update transaction status if it exists
             $transaction = Transaction::where('donation_id', $donation->id)->first();
-            
+
             if ($transaction) {
                 $transaction->update([
                     'status' => $paymentStatus['IsSuccess'] ? 'completed' : 'failed',
@@ -322,28 +326,28 @@ class DonationController extends BaseController
                     ]),
                 ]);
             }
-            
+
             // Update donation status
             $donation->update([
                 'payment_status' => $paymentStatus['IsSuccess'] ? 'completed' : 'failed',
             ]);
-            
+
             // If payment was successful, update cause raised amount
             if ($paymentStatus['IsSuccess']) {
                 $cause = $donation->cause;
                 $cause->raised_amount += $donation->amount;
                 $cause->save();
-                
+
                 // Load necessary relationships
                 $donation->load(['user', 'cause']);
-                
+
                 // Fire the donation created event
                 event(new DonationCreated($donation));
-                
+
                 // Send real-time update for this cause
                 $this->sendRealTimeUpdate($cause->id);
             }
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Payment status updated successfully',

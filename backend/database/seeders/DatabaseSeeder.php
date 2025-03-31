@@ -20,6 +20,14 @@ class DatabaseSeeder extends Seeder
             
             // Then seed categories and causes
             CategoriesTableSeeder::class,
+            
+            // Seed historical data across multiple years
+            HistoricalDataSeeder::class,
+            HistoricalTransactionsSeeder::class,
+            HistoricalFinancialReportsSeeder::class,
+            HistoricalCauseUpdatesSeeder::class,
+            
+            // Seed current data
             CausesTableSeeder::class,
             
             // Seed achievement types (before achievements)

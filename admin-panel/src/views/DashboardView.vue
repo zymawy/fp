@@ -117,7 +117,9 @@ const fetchDashboardStats = async () => {
   try {
     loading.value = true
     error.value = null
-    const response = await axios.get('/admin/dashboard/stats')
+    const response = await axios.get('/admin/dashboard/stats', {
+      params: { period: chartPeriod.value }
+    })
     stats.value = response.data
   } catch (err) {
     console.error('Error fetching dashboard stats:', err)
@@ -133,8 +135,18 @@ const fetchDonationTrends = async () => {
       params: { period: chartPeriod.value }
     })
     
-    chartData.value.labels = response.data.labels
-    chartData.value.datasets[0].data = response.data.data
+    // Transform labels from object to array (if it's an object)
+    const labels = Array.isArray(response.data.labels) 
+      ? response.data.labels 
+      : Object.values(response.data.labels);
+    
+    // Transform data to ensure all values are numbers
+    const data = Array.isArray(response.data.data)
+      ? response.data.data.map(value => Number(value))
+      : [];
+    
+    chartData.value.labels = labels;
+    chartData.value.datasets[0].data = data;
   } catch (err) {
     console.error('Error fetching donation trends:', err)
     error.value = 'Failed to load donation trends'
@@ -143,7 +155,19 @@ const fetchDonationTrends = async () => {
 
 const changeChartPeriod = async (period: string) => {
   chartPeriod.value = period
-  await fetchDonationTrends()
+  loading.value = true
+  
+  try {
+    // Fetch both trends and stats with the updated period
+    await Promise.all([
+      fetchDonationTrends(),
+      fetchDashboardStats()
+    ])
+  } catch (err) {
+    console.error('Error updating dashboard data:', err)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {
