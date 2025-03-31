@@ -7,12 +7,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, Users, Calendar, ArrowLeft, AlertTriangle, DollarSign, Share2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
-import type { Cause } from '@/lib/db';
 import { Layout } from '@/components/Layout';
 import { useState, useEffect } from 'react';
 import { EnhancedProgressBar } from '@/components/EnhancedProgressBar';
 import { api } from '@/lib/api';
 import { useTranslation } from 'react-i18next';
+import { DonationProgressLive } from '@/components/DonationProgressLive';
+import { useCauseRealtime } from '@/hooks/useCauseRealtime';
+
+// Define the Cause interface based on API response
+interface Cause {
+  id: string;
+  title: string;
+  description: string;
+  longDescription?: string;
+  imageUrl: string;
+  raisedAmount: number;
+  goalAmount: number;
+  donorCount?: number;
+  categoryId: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  status: string;
+  startDate?: string;
+  endDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  slug?: string;
+}
 
 // Define the CauseUpdate interface
 interface CauseUpdate {
@@ -27,6 +52,9 @@ interface CauseUpdate {
 // Extend the Cause type to include updates
 interface CauseWithUpdates extends Cause {
   updates?: CauseUpdate[];
+  donor_count?: number;
+  donors_count?: number;
+  unique_donors?: number;
 }
 
 const SUGGESTED_AMOUNTS = [10, 25, 50, 100, 250, 500];
@@ -46,6 +74,14 @@ export default function CauseDetail() {
       if (!id) return;
       try {
         const data = await api.causes.getById(id) as CauseWithUpdates;
+        console.log('Cause detail data received:', {
+          id: data.id,
+          title: data.title,
+          donorCount: data.donorCount,
+          donor_count: data.donor_count,
+          donors_count: data.donors_count,
+          unique_donors: data.unique_donors
+        });
         setCause(data);
       } catch (error) {
         console.error('Error fetching cause:', error);
@@ -71,6 +107,14 @@ export default function CauseDetail() {
     console.log(`Navigating to donation page with amount: ${donationAmount}`);
     navigate(`/causes/${cause.id}/donate?amount=${donationAmount}`);
   };
+
+  // Update the component to calculate donor count from all possible fields
+  const donorCount = 
+    (typeof cause?.donorCount === 'number' && !isNaN(cause.donorCount)) ? cause.donorCount :
+    (typeof cause?.donor_count === 'number' && !isNaN(cause.donor_count)) ? cause.donor_count :
+    (typeof cause?.donors_count === 'number' && !isNaN(cause.donors_count)) ? cause.donors_count :
+    (typeof cause?.unique_donors === 'number' && !isNaN(cause.unique_donors)) ? cause.unique_donors :
+    0;
 
   if (loading) {
     return (
@@ -165,12 +209,11 @@ export default function CauseDetail() {
                   </div>
 
                   <div className="space-y-4">
-                    <EnhancedProgressBar 
-                      value={cause.raisedAmount} 
-                      max={cause.goalAmount}
-                      className="mb-2"
-                      showPercentage
-                      showValues
+                    <DonationProgressLive 
+                      causeId={cause.id}
+                      initialProgress={Math.min(Math.round((cause.raisedAmount / cause.goalAmount) * 100), 100)}
+                      initialRaisedAmount={cause.raisedAmount}
+                      targetAmount={cause.goalAmount}
                     />
                     <div className="flex justify-between text-sm">
                       <span className="font-medium">${cause.raisedAmount.toLocaleString()} {t('cause.raised')}</span>
@@ -181,8 +224,8 @@ export default function CauseDetail() {
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center">
-                        <Heart className="text-primary mr-1.5 h-5 w-5" />
-                        <span className="font-semibold">{cause.donorCount} {t('cause.donors')}</span>
+                        <Users className="text-primary mr-1.5 h-5 w-5" />
+                        <span className="font-semibold">{donorCount} {t('causes.donors')}</span>
                       </div>
                       <div className="flex items-center">
                         <Calendar className="text-primary mr-1.5 h-5 w-5" />

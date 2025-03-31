@@ -1,7 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
-import type { Cause } from '@/lib/db';
+
+// Define Cause interface directly in the file
+export interface Cause {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  featuredImage?: string;
+  featured_image?: string;
+  image_url?: string;
+  image?: string;
+  raisedAmount?: number;
+  raised_amount?: number;
+  goalAmount?: number;
+  goal_amount?: number;
+  target_amount?: number;
+  donorCount?: number;
+  donor_count?: number;
+  donors_count?: number;
+  unique_donors?: number;
+  categoryId?: string;
+  category_id?: string;
+  category_name?: string;
+  category?: {
+    id: string | number;
+    name: string;
+    slug?: string;
+  };
+  status?: string;
+  urgencyLevel?: string;
+  urgency_level?: string;
+  location?: string;
+  progress_percentage?: number;
+  startDate?: Date;
+  endDate?: Date;
+  featured?: boolean;
+  is_featured?: boolean;
+  sliderButtonText?: string;
+  slider_button_text?: string;
+  sliderSubtitle?: string;
+  slider_subtitle?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 interface Filters {
   categoryId?: string;
@@ -13,24 +56,28 @@ interface Filters {
   search?: string;
 }
 
-const PAGE_SIZE = 6;
+// Increase page size to show more items per page
+const PAGE_SIZE = 9;
 
 export function useCauses() {
   const [causes, setCauses] = useState<Cause[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1); // Start with page 1 for API
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true); // Separate initial loading state
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({});
   const { toast } = useToast();
 
-  const fetchCauses = async (pageNumber: number) => {
-    setLoading(true);
+  const fetchCauses = useCallback(async (pageNumber: number, isInitialLoad = false) => {
+    if (isInitialLoad) {
+      setInitialLoading(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
     
     try {
-      console.log('Fetching causes for page:', pageNumber, 'with filters:', filters);
-      
       // Convert filters to API parameters
       const apiFilters: Record<string, any> = {};
       
@@ -45,7 +92,6 @@ export function useCauses() {
       
       // Using the API client to fetch data
       const data = await api.causes.list(pageNumber, PAGE_SIZE, apiFilters);
-      console.log('Received causes data:', data);
       
       // Handle different response formats
       let causesData: Cause[] = [];
@@ -57,41 +103,14 @@ export function useCauses() {
       } else if (!data) {
         causesData = [];
       } else {
-        console.error('Unexpected API response format:', data);
         throw new Error('Received unexpected data format from the server');
       }
       
-      // Map Laravel API response to the Cause type
-      const mappedCauses = causesData.map((cause: any) => ({
-        id: cause.id,
-        title: cause.title,
-        description: cause.description,
-        imageUrl: cause.featured_image || cause.image_url,
-        raisedAmount: parseFloat(cause.current_amount || cause.raised_amount || 0),
-        goalAmount: parseFloat(cause.goal_amount || 0),
-        donorCount: cause.donors_count || cause.donor_count || 0,
-        categoryId: cause.category_id,
-        status: cause.status || 'active',
-        urgencyLevel: cause.urgency_level || 'medium',
-        location: cause.location || '',
-        category: cause.category ? {
-          id: cause.category.id,
-          name: cause.category.name,
-          slug: cause.category.slug
-        } : undefined,
-        startDate: cause.start_date ? new Date(cause.start_date) : undefined,
-        endDate: cause.end_date ? new Date(cause.end_date) : undefined,
-        featured: cause.is_featured || cause.featured || false,
-        sliderButtonText: cause.slider_button_text,
-        sliderSubtitle: cause.slider_subtitle
-      }));
-      
       // Update hasMore based on whether we got a full page
-      setHasMore(mappedCauses.length === PAGE_SIZE);
+      setHasMore(causesData.length === PAGE_SIZE);
       
-      return mappedCauses;
+      return causesData;
     } catch (err) {
-      console.error('Error fetching causes:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load causes';
       setError(errorMessage);
       
@@ -103,47 +122,56 @@ export function useCauses() {
       
       return [];
     } finally {
-      setLoading(false);
+      if (isInitialLoad) {
+        setInitialLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
-  };
+  }, [filters, toast]);
 
-  const loadMore = async () => {
-    if (loading) return;
+  const loadMore = useCallback(async () => {
+    // Prevent concurrent loadMore calls
+    if (loading || !hasMore) return;
     
     const newCauses = await fetchCauses(page);
+    
     if (newCauses && newCauses.length > 0) {
-      setCauses(prev => [...prev, ...newCauses.filter((cause: Cause) => 
-        !prev.some(p => p.id === cause.id)
-      )]);
+      setCauses(prev => {
+        // Filter out duplicates
+        const filteredNewCauses = newCauses.filter(
+          newCause => !prev.some(existingCause => existingCause.id === newCause.id)
+        );
+        return [...prev, ...filteredNewCauses];
+      });
       setPage(prev => prev + 1);
+    } else {
+      setHasMore(false);
     }
-  };
+  }, [fetchCauses, hasMore, loading, page]);
 
-  const updateFilters = (newFilters: Filters) => {
-    console.log('Updating filters:', newFilters);
+  const updateFilters = useCallback((newFilters: Filters) => {
     setFilters(newFilters);
     setPage(1); // Reset to first page
     setCauses([]);
     setHasMore(true);
-  };
+  }, []);
   
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
     setPage(1);
     setCauses([]);
     setHasMore(true);
     
-    const initialData = await fetchCauses(1);
+    const initialData = await fetchCauses(1, true);
     setCauses(initialData || []);
     setPage(2);
-  };
+  }, [fetchCauses]);
 
+  // Load initial data when filters change
   useEffect(() => {
-    // Initial data load
     const loadInitialData = async () => {
       try {
-        console.log('Fetching initial causes data...');
-        const initialData = await fetchCauses(1);
-        console.log('Received causes data:', initialData);
+        const initialData = await fetchCauses(1, true);
         setCauses(initialData || []);
         setPage(2); // Next page would be 2
       } catch (error) {
@@ -152,12 +180,13 @@ export function useCauses() {
     };
     
     loadInitialData();
-  }, [filters]); // Reload when filters change
+  }, [fetchCauses, filters]);
 
   return {
     causes,
     hasMore,
     loading,
+    initialLoading,
     error,
     loadMore,
     updateFilters,

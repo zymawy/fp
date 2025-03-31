@@ -15,7 +15,7 @@ import { InfiniteScrollSentinel } from '@/components/ui/infinite-scroll-sentinel
 import { useTranslation } from 'react-i18next';
 
 export default function Causes() {
-  const { causes, hasMore, loading, loadMore, updateFilters } = useCauses();
+  const { causes, hasMore, loading, initialLoading, loadMore, updateFilters } = useCauses();
   const [categoryOptions, setCategoryOptions] = useState<{ id: string; name: string; }[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
@@ -68,7 +68,6 @@ export default function Causes() {
         })
     );
     
-    console.log('Applying filters:', filtersToApply);
     updateFilters(filtersToApply);
     setShowFilters(false);
   };
@@ -227,7 +226,7 @@ export default function Causes() {
           {/* Filter Tags */}
           <div className="flex flex-wrap gap-2 mb-6">
             {Object.entries(activeFilters).map(([key, value]) => 
-              value ? (
+              value && value !== 'all' && value !== 'any' ? (
                 <div 
                   key={key}
                   className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm flex items-center gap-1"
@@ -269,7 +268,11 @@ export default function Causes() {
           </div>
 
           {/* Causes Grid with Infinite Scroll */}
-          {causes.length === 0 && !loading ? (
+          {initialLoading ? (
+            <div className="flex justify-center my-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : causes.length === 0 && !loading ? (
             <div className="text-center py-12">
               <p className="text-xl text-muted-foreground">{t('causes.noCausesFound')}</p>
               <p className="mt-2 text-muted-foreground">{t('causes.tryAdjustingFilters')}</p>
@@ -285,17 +288,22 @@ export default function Causes() {
               >
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {causes.map((cause) => (
-                    <CauseCard key={cause.id} cause={cause} />
+                    <CauseCard key={cause.id} cause={cause} isRtl={isRtl} />
                   ))}
                 </div>
               </InfiniteScroll>
-              <InfiniteScrollSentinel 
-                isLoading={loading}
-                hasMore={hasMore}
-                className="mt-8"
-                loadingText={t('common.loadingMore')}
-                endingText={t('common.noMoreItems')}
-              />
+              
+              {loading && (
+                <div className="flex justify-center mt-10">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                </div>
+              )}
+              
+              {!loading && !hasMore && causes.length > 0 && (
+                <p className="text-center text-muted-foreground py-6 mt-4">
+                  {t('common.noMoreItems')}
+                </p>
+              )}
             </>
           )}
         </div>

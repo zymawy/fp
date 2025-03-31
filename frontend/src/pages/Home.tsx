@@ -4,22 +4,19 @@ import { Link } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { useCauses } from '@/hooks/useCauses';
+import { useCauses, Cause } from '@/hooks/useCauses';
 import { Layout } from '@/components/Layout';
-import type { Cause } from '@/lib/db';
-import { SimpleCauseCard } from '@/components/SimpleCauseCard';
+import { CauseCard } from '@/components/CauseCard';
 import InfiniteScroll from '@/components/ui/infinite-scroll';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api';
-import { ApiTest } from '@/components/ApiTest';
+import { useAuth } from '@/hooks/useAuth';
 
-// Adapter function to ensure endDate is always a Date for SimpleCauseCard
-const adaptCauseForSimpleCard = (cause: Cause) => {
-  return {
-    ...cause,
-    endDate: cause.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default to 30 days from now if null
-  };
-};
+// We'll be explicit with all the properties we use in the component
+interface ExtendedCause extends Cause {
+  sliderSubtitle?: string;
+  sliderButtonText?: string;
+}
 
 // Type for the partner data
 interface Partner {
@@ -31,43 +28,19 @@ interface Partner {
   order?: number;
 }
 
-// We'll be explicit with all the properties we use in the component
-interface ExtendedCause {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  sliderSubtitle?: string;
-  sliderButtonText?: string;
-  category?: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  // Add any other properties from Cause that you need
-  raisedAmount?: number;
-  goalAmount?: number;
-  donorCount?: number;
-  status?: string;
-  urgencyLevel?: string;
-  location?: string;
-  startDate?: Date;
-  endDate?: Date;
-  featured?: boolean;
-}
-
 export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [featuredCauses, setFeaturedCauses] = useState<ExtendedCause[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   
   // Use the useCauses hook for regular causes
-  const { causes: apiCauses, hasMore, loading: causesLoading, loadMore } = useCauses();
+  const { causes, hasMore, loading: causesLoading, initialLoading, loadMore } = useCauses();
   
   // Use the fetched causes or empty array if nothing is returned
-  const displayedCauses = apiCauses.length > 0 ? apiCauses : [];
+  const displayedCauses = causes.length > 0 ? causes : [];
   
   // Check RTL direction
   const isRtl = i18n.language === 'ar';
@@ -78,7 +51,6 @@ export default function Home() {
       try {
         setLoading(true);
         const featuredData = await api.causes.getFeatured();
-        console.log('Featured causes:', featuredData);
         // Ensure all required fields exist in the returned data
         const processedCauses = featuredData.map((cause: any) => ({
           id: cause.id,
@@ -109,7 +81,6 @@ export default function Home() {
     const fetchPartners = async () => {
       try {
         const partnersData = await api.partners.list();
-        console.log('Partners:', partnersData);
         setPartners(partnersData);
       } catch (error) {
         console.error('Error fetching partners:', error);
@@ -299,29 +270,44 @@ export default function Home() {
             </div>
           </div>
           
-          <InfiniteScroll
-            next={loadMore}
-            hasMore={hasMore}
-            isLoading={causesLoading}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {displayedCauses.map((cause) => (
-                <SimpleCauseCard key={cause.id} cause={adaptCauseForSimpleCard(cause)} />
-              ))}
+          {initialLoading ? (
+            <div className="flex justify-center my-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
             </div>
-          </InfiniteScroll>
-          
-          {causesLoading && (
-            <div className="flex justify-center mt-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          )}
-          
-          {!causesLoading && displayedCauses.length === 0 && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-10 text-center my-8">
-              <h3 className="text-xl font-medium mb-4">No causes found</h3>
-              <p className="text-muted-foreground mb-6">We couldn't find any causes matching your criteria.</p>
-            </div>
+          ) : (
+            <>
+              <InfiniteScroll
+                next={loadMore}
+                hasMore={hasMore}
+                isLoading={causesLoading}
+                threshold={0.5}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                  {displayedCauses.map((cause) => (
+                    <CauseCard key={cause.id} cause={cause} />
+                  ))}
+                </div>
+              </InfiniteScroll>
+              
+              {causesLoading && (
+                <div className="flex justify-center mt-10">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                </div>
+              )}
+              
+              {!causesLoading && !hasMore && displayedCauses.length > 0 && (
+                <p className="text-center text-muted-foreground py-6 mt-4">
+                  {t('common.noMoreItems')}
+                </p>
+              )}
+              
+              {!causesLoading && displayedCauses.length === 0 && (
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-10 text-center my-8">
+                  <h3 className="text-xl font-medium mb-4">No causes found</h3>
+                  <p className="text-muted-foreground mb-6">We couldn't find any causes matching your criteria.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -370,9 +356,9 @@ export default function Home() {
       <section className="py-20 bg-white dark:bg-gray-950">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Impact</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.impact.title', 'Our Impact')}</h2>
             <p className="text-muted-foreground max-w-3xl mx-auto">
-              Through the generous support of our donors, we have achieved significant milestones in various areas.
+              {t('home.impact.subtitle', 'Through the generous support of our donors, we have achieved significant milestones in various areas.')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -380,36 +366,36 @@ export default function Home() {
               <div className="bg-blue-100 dark:bg-blue-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Building2 className="w-8 h-8 text-blue-500 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Community Development</h3>
+              <h3 className="text-xl font-semibold mb-3">{t('home.impact.community.title', 'Community Development')}</h3>
               <p className="text-muted-foreground">
-                We've supported 284 community development projects, benefiting over 1.5 million people in need.
+                {t('home.impact.community.description', "We've supported 284 community development projects, benefiting over 1.5 million people in need.")}
               </p>
             </div>
             <div className="text-center">
               <div className="bg-emerald-100 dark:bg-emerald-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Briefcase className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Education Initiatives</h3>
+              <h3 className="text-xl font-semibold mb-3">{t('home.impact.education.title', 'Education Initiatives')}</h3>
               <p className="text-muted-foreground">
-                Our education programs have helped 42,000 children gain access to quality education and resources.
+                {t('home.impact.education.description', 'Our education programs have helped 42,000 children gain access to quality education and resources.')}
               </p>
             </div>
             <div className="text-center">
               <div className="bg-amber-100 dark:bg-amber-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <BarChart3 className="w-8 h-8 text-amber-500 dark:text-amber-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Economic Empowerment</h3>
+              <h3 className="text-xl font-semibold mb-3">{t('home.impact.economic.title', 'Economic Empowerment')}</h3>
               <p className="text-muted-foreground">
-                We've funded 450 small businesses and entrepreneurial ventures in underprivileged communities.
+                {t('home.impact.economic.description', "We've funded 450 small businesses and entrepreneurial ventures in underprivileged communities.")}
               </p>
             </div>
             <div className="text-center">
               <div className="bg-rose-100 dark:bg-rose-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <ShieldCheck className="w-8 h-8 text-rose-500 dark:text-rose-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Health & Wellness</h3>
+              <h3 className="text-xl font-semibold mb-3">{t('home.impact.health.title', 'Health & Wellness')}</h3>
               <p className="text-muted-foreground">
-                Our medical initiatives have provided healthcare access to 320,000 people in remote and underserved areas.
+                {t('home.impact.health.description', 'Our medical initiatives have provided healthcare access to 320,000 people in remote and underserved areas.')}
               </p>
             </div>
           </div>
@@ -420,10 +406,9 @@ export default function Home() {
       <section className="py-20 bg-primary text-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Make a Difference?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{t('home.cta.title', 'Ready to Make a Difference?')}</h2>
             <p className="text-xl mb-8 text-white/90">
-              Join thousands of supporters who are changing lives through their generosity.
-              Every contribution, no matter the size, helps us create positive change.
+              {t('home.cta.description', 'Join thousands of supporters who are changing lives through their generosity. Every contribution, no matter the size, helps us create positive change.')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/causes">
@@ -432,18 +417,20 @@ export default function Home() {
                   variant="secondary" 
                   className="w-full sm:w-auto h-14 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  Explore Causes
+                  {t('home.cta.exploreCauses', 'Explore Causes')}
                 </Button>
               </Link>
-              <Link to="/signup">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="bg-transparent border-white text-white hover:bg-white hover:text-primary w-full sm:w-auto h-14 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Sign Up Today
-                </Button>
-              </Link>
+              {!user && (
+                <Link to="/signup">
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="bg-transparent border-white text-white hover:bg-white hover:text-primary w-full sm:w-auto h-14 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    {t('home.cta.signUp', 'Sign Up Today')}
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

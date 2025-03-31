@@ -34,7 +34,11 @@
     "noMoreItems": "No more items to load",
     "min": "Min",
     "max": "Max",
-    "currency": "$"
+    "currency": "$",
+    "currencySymbol": "$",
+    "formatCurrency": "{{currencySymbol}} {{value}}",
+    "raised": "raised",
+    "goal": "Goal"
   },
   "categories": {
     "education": "Education",
@@ -145,7 +149,10 @@
     "noCausesFound": "No causes found matching your criteria.",
     "tryAdjustingFilters": "Try adjusting your filters or search terms.",
     "viewCause": "View Cause",
-    "funded": "funded"
+    "funded": "funded",
+    "fundedPercentage": "{{percentage}}% funded",
+    "untitled": "Untitled Cause",
+    "noDescription": "No description available"
   },
   "cause": {
     "about": "About this cause",

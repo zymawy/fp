@@ -15,14 +15,43 @@ interface Cause {
   id: string;
   title: string;
   description: string;
-  image_url: string;
-  goal_amount: number;
-  raised_amount: number;
-  donor_count: number;
-  category_id: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
+  image_url?: string;
+  imageUrl?: string;
+  featured_image?: string;
+  goal_amount?: number;
+  target_amount?: number;
+  goalAmount?: number;
+  raised_amount?: number;
+  current_amount?: number;
+  raisedAmount?: number;
+  donor_count?: number;
+  donors_count?: number;
+  donorCount?: number;
+  category_id?: string;
+  categoryId?: string;
+  category?: {
+    id: string;
+    name: string;
+    slug?: string;
+  };
+  status?: string;
+  urgency_level?: string;
+  urgencyLevel?: string;
+  location?: string;
+  start_date?: string | Date;
+  startDate?: string | Date;
+  end_date?: string | Date;
+  endDate?: string | Date;
+  is_featured?: boolean;
+  featured?: boolean;
+  slider_button_text?: string;
+  sliderButtonText?: string;
+  slider_subtitle?: string;
+  sliderSubtitle?: string;
+  progress_percentage?: number;
+  progressPercentage?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Define the API base URL - this will be proxied by Vite during development
@@ -30,7 +59,7 @@ interface Cause {
 // const API_BASE_URL = '/api';  // Use the proxy set up in Vite config
 // Add /api prefix to ensure all requests go to the correct API endpoints
 // const API_BASE_URL = 'http://127.0.0.1:8001/api';  // Direct call to the external API
-const API_BASE_URL = 'https://9d80-46-230-80-131.ngrok-free.app/api';  // ngrok URL
+const API_BASE_URL = 'https://0046-64-137-246-210.ngrok-free.app/api';  // ngrok URL
 
 // Mock database for storing donations when API server is unavailable
 const LOCAL_STORAGE_DB_KEY = 'local_database';
@@ -405,6 +434,10 @@ export const api = {
             image: string | null;
             goal_amount: number;
             raised_amount: number;
+            progress_percentage?: number;
+            donors_count?: number;
+            donor_count?: number;
+            unique_donors?: number;
             start_date: string | null;
             end_date: string | null;
             status: string;
@@ -451,6 +484,10 @@ export const api = {
                 image: string | null;
                 goal_amount: number;
                 raised_amount: number;
+                progress_percentage?: number;
+                donors_count?: number;
+                donor_count?: number;
+                unique_donors?: number;
                 start_date: string | null;
                 end_date: string | null;
                 status: string;
@@ -471,6 +508,12 @@ export const api = {
               imageUrl: item.attributes.image,
               goalAmount: item.attributes.goal_amount,
               raisedAmount: item.attributes.raised_amount,
+              progress_percentage: item.attributes.progress_percentage || 
+                (item.attributes.raised_amount === 0 ? 0 : Math.min(Math.round((item.attributes.raised_amount / (item.attributes.goal_amount || 1)) * 100), 100)),
+              donorCount: item.attributes.donors_count || item.attributes.donor_count || 0,
+              donor_count: item.attributes.donors_count || item.attributes.donor_count || 0,
+              donors_count: item.attributes.donors_count || 0,
+              unique_donors: item.attributes.unique_donors || item.attributes.donors_count || 0,
               startDate: item.attributes.start_date,
               endDate: item.attributes.end_date,
               status: item.attributes.status,
@@ -501,6 +544,10 @@ export const api = {
             image: string | null;
             goal_amount: number;
             raised_amount: number;
+            progress_percentage?: number;
+            donors_count?: number;
+            donor_count?: number;
+            unique_donors?: number;
             start_date: string | null;
             end_date: string | null;
             status: string;
@@ -527,6 +574,10 @@ export const api = {
                 image: string | null;
                 goal_amount: number;
                 raised_amount: number;
+                progress_percentage?: number;
+                donors_count?: number;
+                donor_count?: number;
+                unique_donors?: number;
                 start_date: string | null;
                 end_date: string | null;
                 status: string;
@@ -547,6 +598,12 @@ export const api = {
               imageUrl: item.attributes.image,
               goalAmount: item.attributes.goal_amount,
               raisedAmount: item.attributes.raised_amount,
+              progress_percentage: item.attributes.progress_percentage || 
+                (item.attributes.raised_amount === 0 ? 0 : Math.min(Math.round((item.attributes.raised_amount / (item.attributes.goal_amount || 1)) * 100), 100)),
+              donorCount: item.attributes.donors_count || item.attributes.donor_count || 0,
+              donor_count: item.attributes.donors_count || item.attributes.donor_count || 0,
+              donors_count: item.attributes.donors_count || 0,
+              unique_donors: item.attributes.unique_donors || item.attributes.donors_count || 0,
               startDate: item.attributes.start_date,
               endDate: item.attributes.end_date,
               status: item.attributes.status,
@@ -574,6 +631,10 @@ export const api = {
             image: string | null;
             goal_amount: number;
             raised_amount: number;
+            progress_percentage?: number;
+            donors_count?: number;
+            donor_count?: number;
+            unique_donors?: number;
             start_date: string | null;
             end_date: string | null;
             status: string;
@@ -599,6 +660,12 @@ export const api = {
               imageUrl: item.attributes.image,
               goalAmount: item.attributes.goal_amount,
               raisedAmount: item.attributes.raised_amount,
+              progress_percentage: item.attributes.progress_percentage || 
+                (item.attributes.raised_amount === 0 ? 0 : Math.min(Math.round((item.attributes.raised_amount / (item.attributes.goal_amount || 1)) * 100), 100)),
+              donorCount: item.attributes.donors_count || item.attributes.donor_count || 0,
+              donor_count: item.attributes.donors_count || item.attributes.donor_count || 0,
+              donors_count: item.attributes.donors_count || 0,
+              unique_donors: item.attributes.unique_donors || item.attributes.donors_count || 0,
               startDate: item.attributes.start_date,
               endDate: item.attributes.end_date,
               status: item.attributes.status,

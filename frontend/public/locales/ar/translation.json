@@ -34,7 +34,11 @@
     "noMoreItems": "لا توجد المزيد من العناصر للتحميل",
     "min": "الحد الأدنى",
     "max": "الحد الأقصى",
-    "currency": "$"
+    "currency": "$",
+    "currencySymbol": "$",
+    "formatCurrency": "{{value}} {{currencySymbol}}",
+    "raised": "تم جمع",
+    "goal": "الهدف"
   },
   "categories": {
     "education": "التعليم",
@@ -146,7 +150,10 @@
     "noCausesFound": "لم يتم العثور على حملات تطابق معاييرك.",
     "tryAdjustingFilters": "حاول تعديل معايير التصفية أو البحث.",
     "viewCause": "عرض الحملة",
-    "funded": "تم تمويله"
+    "funded": "تم تمويله",
+    "fundedPercentage": "{{percentage}}% تم تمويله",
+    "untitled": "حملة بدون عنوان",
+    "noDescription": "لا يوجد وصف متاح"
   },
   "cause": {
     "about": "عن هذه القضية",
