@@ -174,7 +174,7 @@ class PaymentController extends BaseController
                     // Process achievements
                     $achievementService = app(AchievementService::class);
                     $awardedAchievements = $achievementService->processAchievementsForDonation($donation);
-
+                    
                     if (!empty($awardedAchievements)) {
                         Log::info('Achievements awarded after donation payment (callback)', [
                             'donation_id' => $donation->id,
@@ -274,14 +274,13 @@ class PaymentController extends BaseController
             }
 
             // If payment is successful, check for achievements
-
+        
             if ($isPaid && $donation->user_id) {
                 try {
                     // Process achievements
                     $achievementService = app(AchievementService::class);
                     $awardedAchievements = $achievementService->processAchievementsForDonation($donation);
-
-                    info([$awardedAchievements]);
+                    
                     if (!empty($awardedAchievements)) {
                         Log::info('Achievements awarded after donation payment', [
                             'donation_id' => $donation->id,
@@ -300,7 +299,7 @@ class PaymentController extends BaseController
 
             // Load the transaction with the donation for the response
             $transaction = $donation->transaction()->with('donation')->first();
-
+            
             return $this->respondWithData($transaction, new PaymentTransformer, 'transaction', 200);
         } catch (\Exception $e) {
             Log::error('Payment verification error: ' . $e->getMessage());

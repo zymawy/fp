@@ -14,18 +14,18 @@ class CauseController extends BaseController
 {
     /**
      * Check if current user is admin
-     * 
+     *
      * @throws AccessDeniedHttpException
      */
     protected function checkAdmin()
     {
         $user = auth()->user();
-        
+
         if (!$user || !$user->isAdmin()) {
             throw new AccessDeniedHttpException('Admin access required');
         }
     }
-    
+
     /**
      * Display a listing of the resource with filtering options.
      *
@@ -35,57 +35,57 @@ class CauseController extends BaseController
     public function index(Request $request)
     {
         // Base relationships to always load
-        $relationships = ['category'];
-        
+        $relationships = ['category', 'donations'];
+
         // Check if additional relationships were requested via includes parameter
         if ($request->has('include')) {
             $requestedIncludes = explode(',', $request->input('include'));
-            $validIncludes = ['partner', 'donations', 'updates'];
-            
+            $validIncludes = ['partner', 'updates'];
+
             foreach ($requestedIncludes as $include) {
                 if (in_array($include, $validIncludes) && !in_array($include, $relationships)) {
                     $relationships[] = $include;
                 }
             }
         }
-        
+
         $query = Cause::query()->with($relationships);
-        
+
         // Apply filters
         // Filter by title
         if ($request->has('title')) {
             $query->where('title', 'like', '%' . $request->input('title') . '%');
         }
-        
+
         // Filter by description
         if ($request->has('description')) {
             $query->where('description', 'like', '%' . $request->input('description') . '%');
         }
-        
+
         // Filter by category
         if ($request->has('category_id')) {
             $query->where('category_id', $request->input('category_id'));
         }
-        
+
         // Filter by target amount (range)
         if ($request->has('min_target')) {
             $query->where('goal_amount', '>=', $request->input('min_target'));
         }
-        
+
         if ($request->has('max_target')) {
             $query->where('goal_amount', '<=', $request->input('max_target'));
         }
-        
+
         // Filter by status
         if ($request->has('status')) {
             $query->where('status', $request->input('status'));
         }
-        
+
         // Filter by featured status if provided
         if ($request->has('is_featured')) {
             $query->where('is_featured', $request->boolean('is_featured'));
         }
-        
+
         // General search (searches in title and description)
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -94,16 +94,16 @@ class CauseController extends BaseController
                   ->orWhere('description', 'like', '%' . $search . '%');
             });
         }
-        
+
         // Apply sorting
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('sort_direction', 'desc');
         $query->orderBy($sortBy, $sortDirection);
-        
+
         // Paginate results
         $perPage = (int) $request->input('per_page', 10);
         $causes = $query->paginate($perPage);
-        
+
         return $this->respondWithPagination($causes, new CauseTransformer, 'cause', 200);
     }
 
@@ -116,12 +116,11 @@ class CauseController extends BaseController
     public function store(Request $request)
     {
         $this->checkAdmin();
-        
+
         $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:causes',
             'description' => 'required|string',
-            'image' => 'nullable|string',
             'goal_amount' => 'required|numeric|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -132,25 +131,25 @@ class CauseController extends BaseController
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ]);
-        
+
         $data = $request->all();
-        
+
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['title']);
         }
-        
+
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
             $file = $request->file('featured_image');
             $path = $file->store('causes', 'public');
             $data['featured_image'] = Storage::url($path);
         }
-        
+
         $data['raised_amount'] = 0; // Initialize raised amount
-        
+
         $cause = Cause::create($data);
         $cause->load(['category', 'partner']);
-        
+
         return $this->respondWithData($cause, new CauseTransformer, 'cause', 201);
     }
 
@@ -163,26 +162,26 @@ class CauseController extends BaseController
     public function show(string $id, Request $request)
     {
         // Base relationships to always load
-        $relationships = ['category'];
-        
+        $relationships = ['category', 'donations'];
+
         // Check if additional relationships were requested via includes parameter
         if ($request->has('include')) {
             $requestedIncludes = explode(',', $request->input('include'));
-            $validIncludes = ['partner', 'donations', 'updates'];
-            
+            $validIncludes = ['partner', 'updates'];
+
             foreach ($requestedIncludes as $include) {
                 if (in_array($include, $validIncludes) && !in_array($include, $relationships)) {
                     $relationships[] = $include;
                 }
             }
         }
-        
+
         // Try to find by ID first, then by slug
         $cause = Cause::with($relationships)
             ->where('id', $id)
             ->orWhere('slug', $id)
             ->firstOrFail();
-        
+
         return $this->respondWithData($cause, new CauseTransformer, 'cause', 200);
     }
 
@@ -196,7 +195,7 @@ class CauseController extends BaseController
     public function update(Request $request, Cause $cause)
     {
         $this->checkAdmin();
-        
+
         $request->validate([
             'title' => 'sometimes|string|max:255',
             'slug' => 'nullable|string|max:255|unique:causes,slug,' . $cause->id,
@@ -212,13 +211,13 @@ class CauseController extends BaseController
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ]);
-        
+
         $data = $request->all();
-        
+
         if (isset($data['title']) && empty($data['slug'])) {
             $data['slug'] = Str::slug($data['title']);
         }
-        
+
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
             // Delete old image if it exists
@@ -226,15 +225,15 @@ class CauseController extends BaseController
                 $oldPath = str_replace('/storage/', '', $cause->featured_image);
                 Storage::disk('public')->delete($oldPath);
             }
-            
+
             $file = $request->file('featured_image');
             $path = $file->store('causes', 'public');
             $data['featured_image'] = Storage::url($path);
         }
-        
+
         $cause->update($data);
         $cause->load(['category', 'partner', 'donations', 'updates']);
-        
+
         return $this->respondWithData($cause, new CauseTransformer, 'cause', 200);
     }
 
@@ -247,20 +246,20 @@ class CauseController extends BaseController
     public function destroy(Cause $cause)
     {
         $this->checkAdmin();
-        
+
         // Check if cause has donations
         if ($cause->donations()->exists()) {
             return $this->respondWithError('Cannot delete cause with associated donations', 422);
         }
-        
+
         // Delete featured image if it exists
         if ($cause->featured_image) {
             $path = str_replace('/storage/', '', $cause->featured_image);
             Storage::disk('public')->delete($path);
         }
-        
+
         $cause->delete();
-        
+
         return $this->response->noContent();
     }
-} 
+}

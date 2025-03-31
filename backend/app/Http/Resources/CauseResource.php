@@ -36,6 +36,9 @@ class CauseResource extends JsonResource
             'donors_count' => $this->when($this->relationLoaded('donations'), function () {
                 return $this->donations->unique('user_id')->count();
             }),
+            'donor_count' => $this->when($this->relationLoaded('donations'), function () {
+                return $this->donations->unique('user_id')->count();
+            }),
             'percentage_funded' => $this->when($this->goal_amount > 0, function () {
                 return round(($this->current_amount / $this->goal_amount) * 100, 2);
             }, 0),

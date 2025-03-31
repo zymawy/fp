@@ -115,7 +115,6 @@ class Cause extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        dd($value);
         return $this->where('id', $value)->firstOrFail();
     }
 }

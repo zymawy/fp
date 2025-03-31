@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\MyFatoorahController;
 use Illuminate\Support\Facades\Log;
 use MyFatoorah\Library\API\Payment\MyFatoorahPaymentEmbedded;
 use MyFatoorah\Library\API\Payment\MyFatoorahPaymentStatus;

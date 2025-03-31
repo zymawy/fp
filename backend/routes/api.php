@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\CentrifugoController;
+use App\Http\Controllers\Api\AdminPanelApiController;
+use App\Http\Controllers\Api\ReportsController;
 use Dingo\Api\Routing\Router;
 
 /** @var Router $api */
@@ -48,6 +50,7 @@ $api->version('v1', [
     $api->post('payments/webhook', 'PaymentController@webhook')->name('payments.webhook');
     $api->get('payments/callback', 'PaymentController@callback')->name('payments.callback');
     $api->get('payments/error', 'PaymentController@errorCallback')->name('payments.error');
+    $api->post('payments/donation-callback', 'DonationController@paymentCallback')->name('payments.donation-callback');
 
     // Payment methods routes
     $api->get('payment-methods', 'PaymentMethodController@index')->name('payment-methods.index');
@@ -59,6 +62,15 @@ $api->version('v1', [
     $api->get('donations', 'DonationController@index')->name('donations.index');
     $api->post('donations', 'DonationController@store')->name('donations.store');
     $api->get('donations/{donation}', 'DonationController@show')->name('donations.show');
+
+    // Routes for admin panel
+    $api->get('admin/dashboard/stats', 'AdminPanelApiController@getDashboardStats')->name('admin.dashboard.stats');
+    $api->get('admin/dashboard/trends', 'AdminPanelApiController@getDonationTrends')->name('admin.dashboard.trends');
+    $api->get('admin/dashboard/activity', 'AdminPanelApiController@getRecentActivity')->name('admin.dashboard.activity');
+    $api->get('admin/dashboard/user-growth', 'AdminPanelApiController@getUserGrowth')->name('admin.dashboard.user-growth');
+    
+    // New Reports API route
+    $api->get('reports', 'ReportsController@getReports')->name('reports');
 
     // Protected routes with JWT authentication
     $api->group(['middleware' => 'api.auth'], function (Router $api) {

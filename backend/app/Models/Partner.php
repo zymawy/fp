@@ -25,6 +25,7 @@ class Partner extends Model implements Transformable
         'description',
         'website',
         'is_featured',
+        'status',
     ];
 
     /**
