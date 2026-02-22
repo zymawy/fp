@@ -88,24 +88,18 @@ export default function Payment() {
     const fetchPaymentMethods = async () => {
       try {
         setLoadingMethods(true);
-        console.log(t('payment.logs.fetchingMethods'), totalAmount);
-        
-        // Get payment methods
+
         const methods = await getPaymentMethods(totalAmount);
-        console.log(t('payment.logs.methodsReceived'), methods);
-        
+
         if (Array.isArray(methods) && methods.length > 0) {
           setPaymentMethods(methods);
           // Select the first payment method by default
           const defaultMethod = String(methods[0].PaymentMethodId);
           setPaymentMethod(defaultMethod);
-          console.log(t('payment.logs.defaultMethod'), defaultMethod);
         } else {
-          console.error(t('payment.logs.noValidMethods'), methods);
           setPaymentMethods([]);
         }
-      } catch (error) {
-        console.error(t('payment.logs.fetchMethodsError'), error);
+      } catch {
         setPaymentMethods([]);
       } finally {
         setLoadingMethods(false);
@@ -114,11 +108,6 @@ export default function Payment() {
 
     fetchPaymentMethods();
   }, [totalAmount, t]);
-
-  // Add a separate effect to log payment method changes
-  useEffect(() => {
-    console.log('Current payment method set to:', paymentMethod);
-  }, [paymentMethod]);
 
   if (loadingMethods) {
     return (
@@ -163,25 +152,8 @@ export default function Payment() {
     );
   }
 
-  // Add a function to debug form submission
-  const logPaymentDetails = () => {
-    console.log(t('payment.logs.submissionDetails'), {
-      amount,
-      totalAmount,
-      paymentMethod,
-      isGift,
-      giftDetails: isGift ? giftDetails : t('payment.logs.notApplicable'),
-      isAnonymous,
-      coverFees,
-      selectedMethod: paymentMethods.find(m => String(m.PaymentMethodId) === paymentMethod)
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Log payment details before submission
-    logPaymentDetails();
     
     if (!user) {
       navigate('/signin');
@@ -208,8 +180,6 @@ export default function Payment() {
       const processingFee = coverFees ? calculateFee(amount) : 0;
       const finalAmount = coverFees ? amount + processingFee : amount;
       
-      console.log(t('payment.logs.executingPayment'), finalAmount, currencyCode);
-
       const response = await executePayment({
         amount: finalAmount,
         customerName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email,
@@ -280,7 +250,6 @@ export default function Payment() {
   };
 
   const handlePaymentMethodChange = (value: string) => {
-    console.log(t('payment.logs.methodChanging'), paymentMethod, t('payment.logs.to'), value);
     setPaymentMethod(value);
   };
 

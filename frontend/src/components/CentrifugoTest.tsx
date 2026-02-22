@@ -37,7 +37,6 @@ const CentrifugoTest: React.FC<CentrifugoTestProps> = ({ causeId }) => {
           setSubscribed(true);
         },
         (err: Error) => {
-          console.error('Error subscribing to updates:', err);
           setError(`Subscription error: ${err.message}`);
           setSubscribed(false);
         }
@@ -82,7 +81,6 @@ const CentrifugoTest: React.FC<CentrifugoTestProps> = ({ causeId }) => {
       const result = await centrifugoService.checkConnection();
       setConnectionCheck(result);
     } catch (err) {
-      console.error('Error checking connection:', err);
       setConnectionCheck({
         error: String(err),
         status: 'error'

@@ -42,8 +42,6 @@ export function useStatistics() {
         // Fix: Remove the /api prefix to avoid duplication and remove leading /
         const response = await api.get<ApiResponse>(`users/${user.id}/statistics`);
         
-        console.log('Statistics response:', response);
-        
         if (response && typeof response === 'object') {
           // Handle case where we get direct data object
           if ('totalDonated' in response && 'donationCount' in response && 'achievementCount' in response) {
@@ -63,16 +61,13 @@ export function useStatistics() {
               loading: false
             });
           } else {
-            console.error('Invalid statistics response format:', response);
             setStatistics(prev => ({ ...prev, loading: false }));
           }
         } else {
-          console.error('Empty or invalid statistics response:', response);
           setStatistics(prev => ({ ...prev, loading: false }));
         }
-      } catch (error) {
-        console.error('Error fetching statistics:', error);
-        // Just set loading to false, keep the zero values for stats
+      } catch {
+        // Keep zero values for stats on error
         setStatistics(prev => ({ ...prev, loading: false }));
       }
     };

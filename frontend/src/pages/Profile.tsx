@@ -60,8 +60,7 @@ export default function Profile() {
         return t('common.invalidDate');
       }
       return date.toLocaleDateString();
-    } catch (e) {
-      console.error('Error formatting date:', e);
+    } catch {
       return t('common.invalidDate');
     }
   };
@@ -80,8 +79,7 @@ export default function Profile() {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       })}`;
-    } catch (e) {
-      console.error('Error formatting amount:', e);
+    } catch {
       return '$0.00';
     }
   };

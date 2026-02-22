@@ -174,8 +174,8 @@ export function useCauses() {
         const initialData = await fetchCauses(1, true);
         setCauses(initialData || []);
         setPage(2); // Next page would be 2
-      } catch (error) {
-        console.error('Error loading initial causes:', error);
+      } catch {
+        // Error handled by fetchCauses which sets error state
       }
     };
     

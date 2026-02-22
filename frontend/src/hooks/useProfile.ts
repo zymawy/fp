@@ -39,9 +39,7 @@ export function useProfile() {
   const fetchProfile = async () => {
     if (!user) return;
     try {
-      console.log('Fetching profile data for user:', user.id);
       const response = await api.get<ProfileResponse>('profile');
-      console.log('Profile API response:', response);
 
       if (!response || !response.data) throw new Error('Profile not found or API returned empty response');
 
@@ -56,14 +54,10 @@ export function useProfile() {
         updated_at: response.data.attributes.updated_at,
       };
 
-      console.log('Processed profile data:', profileData);
       setProfile(profileData);
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      
       // Fall back to using basic user data from auth if available
       if (user) {
-        console.log('Falling back to basic user data from auth');
         const fallbackProfile: Profile = {
           id: user.id,
           first_name: user.firstName || user.name?.split(' ')[0] || '',
@@ -115,14 +109,11 @@ export function useProfile() {
           
           // Save updated user data back to localStorage
           localStorage.setItem('session', JSON.stringify(updatedUserData));
-          
+
           // Notify the app about the auth state change
           dispatchAuthStateChangeEvent();
-          
-          console.log('Updated user data in localStorage:', updatedUserData);
         }
-      } catch (storageError) {
-        console.error('Error updating localStorage:', storageError);
+      } catch {
         // Continue even if localStorage update fails, as backend is already updated
       }
       

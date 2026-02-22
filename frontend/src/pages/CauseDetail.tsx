@@ -74,17 +74,9 @@ export default function CauseDetail() {
       if (!id) return;
       try {
         const data = await api.causes.getById(id) as CauseWithUpdates;
-        console.log('Cause detail data received:', {
-          id: data.id,
-          title: data.title,
-          donorCount: data.donorCount,
-          donor_count: data.donor_count,
-          donors_count: data.donors_count,
-          unique_donors: data.unique_donors
-        });
         setCause(data);
-      } catch (error) {
-        console.error('Error fetching cause:', error);
+      } catch {
+        // Error is handled by the loading/null check in the render
       } finally {
         setLoading(false);
       }
@@ -95,16 +87,13 @@ export default function CauseDetail() {
 
   const handleDonate = () => {
     if (!donationAmount) {
-      console.log('No donation amount selected');
       return;
     }
-    
+
     if (!cause?.id) {
-      console.error('No cause ID available for donation');
       return;
     }
-    
-    console.log(`Navigating to donation page with amount: ${donationAmount}`);
+
     navigate(`/causes/${cause.id}/donate?amount=${donationAmount}`);
   };
 

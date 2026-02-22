@@ -22,7 +22,6 @@ export function useCauseRealtime(causeId: string) {
           setIsSubscribed(true);
         },
         (err: Error) => {
-          console.error('Error subscribing to donation updates:', err);
           setError(`Error connecting to real-time updates: ${err.message}`);
           setIsSubscribed(false);
         }

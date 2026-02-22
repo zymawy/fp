@@ -69,7 +69,6 @@ async function generateCertificate(data: {
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error generating certificate:', error);
     throw error;
   }
 }
@@ -99,7 +98,6 @@ async function sendEmail(to: string, subject: string, body: string) {
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error sending email:', error);
     throw error;
   }
 }
@@ -138,15 +136,13 @@ export default function PaymentSuccess() {
         }
         
         const paymentVerification = await verifyPayment(paymentId || transactionId);
-        console.log('Payment verification response:', paymentVerification);
         const { attributes } = paymentVerification;
         
           // Handle JSON:API format
           
           // Check payment method and amount to determine success
           if (attributes.payment_method && attributes.amount > 0) {
-            // Consider it successful if it has a payment method and positive amount
-            console.log('Payment verified via JSON:API format');
+            // Verified: has a payment method and positive amount
           } else {
             throw new Error(t('payment.verificationFailed'));
           }
@@ -162,7 +158,6 @@ export default function PaymentSuccess() {
             setIsSuccess(true);
         
       } catch (err) {
-        console.error('Payment verification error:', err);
         setError(err instanceof Error ? err.message : t('payment.unexpectedError'));
         setIsSuccess(false);
       } finally {
@@ -181,7 +176,6 @@ export default function PaymentSuccess() {
   // Process a successful donation by generating certificate
   const processDonationSuccess = async (donationData: any) => {
     try {
-      console.log('Processing successful donation for certificate:', donationData);
       
       // Check if the data is in JSON:API format with nested attributes
       // const attributes = donationData.attributes || donationData;
@@ -215,8 +209,7 @@ export default function PaymentSuccess() {
       //     setCertificate(certificateResponse);
       //   }
       // }
-    } catch (error) {
-      console.error('Certificate generation error:', error);
+    } catch {
       toast({
         title: t('payment.certificateError'),
         description: t('payment.certificateErrorDescription'),

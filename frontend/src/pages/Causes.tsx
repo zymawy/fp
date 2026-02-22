@@ -50,8 +50,8 @@ export default function Causes() {
       try {
         const categories = await api.categories.list();
         setCategoryOptions(categories);
-      } catch (error) {
-        console.error("Failed to load categories:", error);
+      } catch {
+        // Categories failed to load; filter will be unavailable
       }
     };
     

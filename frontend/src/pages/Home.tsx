@@ -65,8 +65,8 @@ export default function Home() {
           sliderButtonText: cause.slider_button_text
         })) as ExtendedCause[];
         setFeaturedCauses(processedCauses);
-      } catch (error) {
-        console.error('Error fetching featured causes:', error);
+      } catch {
+        // Featured causes failed to load
       } finally {
         setLoading(false);
       }
@@ -81,8 +81,8 @@ export default function Home() {
       try {
         const partnersData = await api.partners.list();
         setPartners(partnersData);
-      } catch (error) {
-        console.error('Error fetching partners:', error);
+      } catch {
+        // Partners failed to load
       }
     };
 

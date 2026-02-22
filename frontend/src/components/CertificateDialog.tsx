@@ -37,8 +37,8 @@ export function CertificateDialog({ open, onOpenChange, donation, donorName }: C
       link.download = `donation-certificate-${new Date().getTime()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-    } catch (error) {
-      console.error('Error generating certificate:', error);
+    } catch {
+      // Certificate generation failed silently - user can try again
     } finally {
       setDownloading(false);
     }

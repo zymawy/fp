@@ -51,8 +51,7 @@ export default function CertificatePage() {
         }
 
         setCertificateData(response.data);
-      } catch (err) {
-        console.error('Error fetching certificate:', err);
+      } catch {
         setError(t('errors.failedToLoadCertificate'));
         toast({
           variant: 'destructive',

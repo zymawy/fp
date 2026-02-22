@@ -27,9 +27,6 @@ export default function InfiniteScroll({
   React.useEffect(() => {
     let safeThreshold = threshold;
     if (threshold < 0 || threshold > 1) {
-      console.warn(
-        'threshold should be between 0 and 1. You are exceeding the range. Will use default value: 0.5',
-      );
       safeThreshold = 0.5;
     }
 
@@ -45,7 +42,6 @@ export default function InfiniteScroll({
     observer.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
-          console.log('Infinite scroll triggered, loading more items...');
           next();
         }
       },
