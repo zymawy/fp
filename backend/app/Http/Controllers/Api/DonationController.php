@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use App\Events\DonationUpdated;
 use App\Events\DonationCreated;
+use Illuminate\Support\Facades\DB;
 
 class DonationController extends BaseController
 {
@@ -31,7 +32,6 @@ class DonationController extends BaseController
     {
         $user = auth()->user();
 
-        info($user);
         if (!$user || !$user->isAdmin()) {
             throw new AccessDeniedHttpException('Admin access required');
         }
@@ -332,11 +332,13 @@ class DonationController extends BaseController
                 'payment_status' => $paymentStatus['IsSuccess'] ? 'completed' : 'failed',
             ]);
 
-            // If payment was successful, update cause raised amount
+            // If payment was successful, update cause raised amount atomically
             if ($paymentStatus['IsSuccess']) {
-                $cause = $donation->cause;
-                $cause->raised_amount += $donation->amount;
-                $cause->save();
+                DB::transaction(function () use ($donation) {
+                    $cause = \App\Models\Cause::lockForUpdate()->findOrFail($donation->cause_id);
+                    $cause->raised_amount += $donation->amount;
+                    $cause->save();
+                });
 
                 // Load necessary relationships
                 $donation->load(['user', 'cause']);
@@ -345,7 +347,7 @@ class DonationController extends BaseController
                 event(new DonationCreated($donation));
 
                 // Send real-time update for this cause
-                $this->sendRealTimeUpdate($cause->id);
+                $this->sendRealTimeUpdate($donation->cause_id);
             }
 
             return response()->json([

@@ -58,20 +58,6 @@ $api->version('v1', [
     $api->post('payment-methods/initiate', 'PaymentMethodController@initiatePayment')->name('payment-methods.initiate');
     $api->get('payment-methods/refresh', 'PaymentMethodController@refresh')->name('payment-methods.refresh');
 
-    // Temporary public access to donations routes - IMPORTANT: Move these behind authentication later
-    $api->get('donations', 'DonationController@index')->name('donations.index');
-    $api->post('donations', 'DonationController@store')->name('donations.store');
-    $api->get('donations/{donation}', 'DonationController@show')->name('donations.show');
-
-    // Routes for admin panel
-    $api->get('admin/dashboard/stats', 'AdminPanelApiController@getDashboardStats')->name('admin.dashboard.stats');
-    $api->get('admin/dashboard/trends', 'AdminPanelApiController@getDonationTrends')->name('admin.dashboard.trends');
-    $api->get('admin/dashboard/activity', 'AdminPanelApiController@getRecentActivity')->name('admin.dashboard.activity');
-    $api->get('admin/dashboard/user-growth', 'AdminPanelApiController@getUserGrowth')->name('admin.dashboard.user-growth');
-    
-    // New Reports API route
-    $api->get('reports', 'ReportsController@getReports')->name('reports');
-
     // Protected routes with JWT authentication
     $api->group(['middleware' => 'api.auth'], function (Router $api) {
         $api->post('auth/logout', 'Auth\AuthController@logout')->name('auth.logout');
@@ -94,6 +80,9 @@ $api->version('v1', [
         $api->get('api/users/{user}/statistics', 'UserController@statistics')->name('users.statistics');
 
         // Donations - authenticated operations
+        $api->get('donations', 'DonationController@index')->name('donations.index');
+        $api->post('donations', 'DonationController@store')->name('donations.store');
+        $api->get('donations/{donation}', 'DonationController@show')->name('donations.show');
         $api->put('donations/{donation}', 'DonationController@update')->name('donations.update');
         $api->delete('donations/{donation}', 'DonationController@destroy')->name('donations.destroy');
 
@@ -111,6 +100,15 @@ $api->version('v1', [
             $api->get('dashboard/stats', 'DashboardController@getStats')->name('dashboard.stats');
             $api->get('dashboard/trends', 'DashboardController@getTrends')->name('dashboard.trends');
             $api->get('dashboard/recent-donations', 'DashboardController@getRecentDonations')->name('dashboard.recent-donations');
+
+            // Admin panel dashboard routes
+            $api->get('admin/dashboard/stats', 'AdminPanelApiController@getDashboardStats')->name('admin.dashboard.stats');
+            $api->get('admin/dashboard/trends', 'AdminPanelApiController@getDonationTrends')->name('admin.dashboard.trends');
+            $api->get('admin/dashboard/activity', 'AdminPanelApiController@getRecentActivity')->name('admin.dashboard.activity');
+            $api->get('admin/dashboard/user-growth', 'AdminPanelApiController@getUserGrowth')->name('admin.dashboard.user-growth');
+
+            // Reports route
+            $api->get('reports', 'ReportsController@getReports')->name('reports');
 
             // Admin-only resource routes
             $api->post('categories', 'CategoryController@store')->name('categories.store');

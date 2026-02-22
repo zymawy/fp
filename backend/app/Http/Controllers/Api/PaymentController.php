@@ -316,7 +316,29 @@ class PaymentController extends BaseController
     public function webhook(Request $request)
     {
         try {
-            Log::info('Payment webhook received', $request->all());
+            // Verify webhook signature from MyFatoorah
+            $webhookSecretKey = config('myfatoorah.webhook_secret_key');
+            $signatureHeader = $request->header('MyFatoorah-Signature');
+
+            if (!empty($webhookSecretKey)) {
+                if (empty($signatureHeader)) {
+                    Log::warning('Webhook received without signature header');
+                    return $this->response->error('Missing webhook signature', 403);
+                }
+
+                $computedSignature = hash_hmac('sha256', $request->getContent(), $webhookSecretKey);
+                if (!hash_equals($computedSignature, $signatureHeader)) {
+                    Log::warning('Webhook signature verification failed', [
+                        'expected' => $computedSignature,
+                        'received' => $signatureHeader,
+                    ]);
+                    return $this->response->error('Invalid webhook signature', 403);
+                }
+            } else {
+                Log::warning('Webhook secret key not configured. Skipping signature verification.');
+            }
+
+            Log::info('Payment webhook received');
 
             // Handle MyFatoorah webhooks
             $data = $request->all();
@@ -434,26 +456,18 @@ class PaymentController extends BaseController
 //                'reference' => $validated['customerReference'] ?? uniqid('pay_'),
             ];
 
-            // Log incoming request data for debugging
-            \Illuminate\Support\Facades\Log::info('Payment execution request:', [
-                'paymentData' => $paymentData,
-                'rawRequest' => $request->all()
-            ]);
-
             // Execute payment through MyFatoorah service
             $response = $this->myFatoorahService->initiatePayment($paymentData);
 
-            Log::info('Payment execution request response:', [$response]);
             // Return the payment URL and invoice ID
             return $this->response->array([
                 'success' => true,
                 'message' => 'Payment execution initialized successfully',
                 'data' => [
                     'PaymentURL' => $response['invoiceURL'] ?? $response['paymentURL'] ?? null,
-                    'invoiceId' => $response['invoiceId'] ?? $response['invoiceId'] ?? null,
-                    'paymentId' => $response['invoiceId'] ?? $response['invoiceId'] ?? null,
+                    'invoiceId' => $response['invoiceId'] ?? null,
+                    'paymentId' => $response['invoiceId'] ?? null,
                 ],
-                'raw' => $response
             ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Payment execution failed: ' . $e->getMessage());
