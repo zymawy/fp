@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Casts\Json;
 use App\Transformers\RoleTransformer;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Role extends BaseModel
 {
-    use SoftDeletes;
+    use HasUuids, SoftDeletes;
     
     public $transformer  = RoleTransformer::class;
 

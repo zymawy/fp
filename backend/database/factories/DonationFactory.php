@@ -3,15 +3,17 @@
 namespace Database\Factories;
 
 use App\Models\Cause;
+use App\Models\Donation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Donation>
  */
 class DonationFactory extends Factory
 {
+    protected $model = Donation::class;
+
     /**
      * Define the model's default state.
      *
@@ -24,38 +26,17 @@ class DonationFactory extends Factory
         $coverFees = $this->faker->boolean(70);
         $totalAmount = $coverFees ? $amount + $processingFee : $amount;
         $isGift = $this->faker->boolean(20);
-        
-        $paymentStatuses = ['completed', 'pending', 'failed', 'refunded'];
-        $currencyCodes = ['USD', 'EUR', 'GBP'];
-        
-        // Safely get a random user ID
-        try {
-            $userId = Schema::hasTable('users') ? 
-                User::inRandomOrder()->first()?->id : 
-                $this->faker->uuid();
-        } catch (\Exception $e) {
-            $userId = $this->faker->uuid();
-        }
-        
-        // Safely get a random cause ID
-        try {
-            $causeId = Schema::hasTable('causes') ? 
-                Cause::inRandomOrder()->first()?->id : 
-                $this->faker->uuid();
-        } catch (\Exception $e) {
-            $causeId = $this->faker->uuid();
-        }
-        
+
         return [
-            'user_id' => $userId,
-            'cause_id' => $causeId,
+            'user_id' => User::factory(),
+            'cause_id' => Cause::factory(),
             'amount' => $amount,
             'total_amount' => $totalAmount,
             'processing_fee' => $processingFee,
             'is_anonymous' => $this->faker->boolean(30),
             'cover_fees' => $coverFees,
-            'currency_code' => $this->faker->randomElement($currencyCodes),
-            'payment_status' => $this->faker->randomElement($paymentStatuses),
+            'currency_code' => $this->faker->randomElement(['USD', 'EUR', 'GBP']),
+            'payment_status' => $this->faker->randomElement(['completed', 'pending', 'failed']),
             'payment_method_id' => $this->faker->bothify('pm_????_????????'),
             'payment_id' => $this->faker->bothify('pi_????_????????'),
             'is_gift' => $isGift,
@@ -64,18 +45,34 @@ class DonationFactory extends Factory
             'recipient_email' => $isGift ? $this->faker->email() : null,
         ];
     }
-    
+
     /**
      * Define a state for completed donations.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function completed(): Factory
+    public function completed(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'payment_status' => 'completed',
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'payment_status' => 'completed',
+        ]);
+    }
+
+    /**
+     * Define a state for pending donations.
+     */
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'payment_status' => 'pending',
+        ]);
+    }
+
+    /**
+     * Define a state for anonymous donations.
+     */
+    public function anonymous(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_anonymous' => true,
+        ]);
     }
 }

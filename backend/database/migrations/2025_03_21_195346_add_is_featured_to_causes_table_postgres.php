@@ -12,8 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Using raw SQL for PostgreSQL
-        DB::statement('ALTER TABLE causes ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false');
+        if (! Schema::hasColumn('causes', 'is_featured')) {
+            Schema::table('causes', function (Blueprint $table) {
+                $table->boolean('is_featured')->default(false);
+            });
+        }
     }
 
     /**
@@ -21,7 +24,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Using raw SQL for PostgreSQL
-        DB::statement('ALTER TABLE causes DROP COLUMN IF EXISTS is_featured');
+        if (Schema::hasColumn('causes', 'is_featured')) {
+            Schema::table('causes', function (Blueprint $table) {
+                $table->dropColumn('is_featured');
+            });
+        }
     }
 };

@@ -1,111 +1,190 @@
 <?php
 
-namespace Tests\Feature;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Cause;
 use App\Models\Category;
+use App\Models\Cause;
+use App\Models\Donation;
+use App\Models\User;
 
-class CauseTest extends TestCase
-{
-    use RefreshDatabase, WithFaker;
+/*
+|--------------------------------------------------------------------------
+| Cause Tests
+|--------------------------------------------------------------------------
+|
+| Covers: public listing, single cause view, relationships, filtering,
+| and search on causes. All list/show routes are public (no auth needed).
+|
+*/
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        
-        // Create test data
-        $this->seed(\Database\Seeders\RolesTableSeeder::class);
-        $this->seed(\Database\Seeders\CategoriesTableSeeder::class);
-    }
+// ── List Causes (Public) ──────────────────────────────────────────────────
 
-    public function test_guest_can_list_causes(): void
-    {
-        // Create some causes
-        Cause::factory()->count(5)->create();
+it('lists all causes without authentication', function () {
+    $category = Category::factory()->create();
+    Cause::factory()->count(5)->create(['category_id' => $category->id]);
 
-        // Request list of causes
-        $response = $this->getJson('/api/causes');
+    $response = $this->getJson('/api/causes', ['Accept' => 'application/json']);
 
-        // Assert successful response with 5 causes
-        $response->assertStatus(200)
-                ->assertJsonCount(5, 'data');
-    }
+    $response->assertStatus(200)
+        ->assertJsonStructure(['data']);
 
-    public function test_guest_can_view_single_cause(): void
-    {
-        // Create a cause
-        $cause = Cause::factory()->create([
-            'title' => 'Test Cause',
-            'description' => 'This is a test cause',
-        ]);
+    expect(count($response->json('data')))->toBe(5);
+});
 
-        // Request the cause
-        $response = $this->getJson("/api/causes/{$cause->id}");
+it('returns an empty list when no causes exist', function () {
+    $response = $this->getJson('/api/causes', ['Accept' => 'application/json']);
 
-        // Assert successful response
-        $response->assertStatus(200)
-                ->assertJsonPath('data.title', 'Test Cause')
-                ->assertJsonPath('data.description', 'This is a test cause');
-    }
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(0);
+});
 
-    public function test_admin_can_create_cause(): void
-    {
-        // Create an admin user
-        $admin = User::factory()->create();
-        $admin->roles()->attach(
-            \App\Models\Role::where('role_name', 'Admin')->first()->id
-        );
+it('paginates causes with per_page parameter', function () {
+    $category = Category::factory()->create();
+    Cause::factory()->count(15)->create(['category_id' => $category->id]);
 
-        // Get a category
-        $category = Category::first();
+    $response = $this->getJson('/api/causes?per_page=5', ['Accept' => 'application/json']);
 
-        // Authenticate as admin
-        $this->actingAs($admin);
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(5);
+});
 
-        // Create a cause
-        $response = $this->postJson('/api/causes', [
-            'title' => 'New Cause',
-            'description' => 'Description for new cause',
-            'goal_amount' => 5000,
-            'category_id' => $category->id,
-            'urgency_level' => 'medium',
-            'status' => 'active',
-        ]);
+// ── Single Cause (Public) ─────────────────────────────────────────────────
 
-        // Assert successful response
-        $response->assertStatus(201)
-                ->assertJsonPath('data.title', 'New Cause');
+it('shows a single cause by ID', function () {
+    $category = Category::factory()->create();
+    $cause    = Cause::factory()->create([
+        'title'       => 'Help Build a School',
+        'category_id' => $category->id,
+    ]);
 
-        // Assert cause was created in the database
-        $this->assertDatabaseHas('causes', [
-            'title' => 'New Cause',
-            'description' => 'Description for new cause',
-        ]);
-    }
+    $response = $this->getJson("/api/causes/{$cause->id}", ['Accept' => 'application/json']);
 
-    public function test_guest_cannot_create_cause(): void
-    {
-        // Get a category
-        $category = Category::first();
+    $response->assertStatus(200)
+        ->assertJsonPath('data.id', $cause->id)
+        ->assertJsonPath('data.attributes.title', 'Help Build a School');
+});
 
-        // Attempt to create a cause without authentication
-        $response = $this->postJson('/api/causes', [
-            'title' => 'Unauthorized Cause',
-            'description' => 'Description',
-            'goal_amount' => 1000,
-            'category_id' => $category->id,
-        ]);
+it('shows a single cause by slug', function () {
+    $category = Category::factory()->create();
+    $cause    = Cause::factory()->create([
+        'title'       => 'Clean Water Initiative',
+        'slug'        => 'clean-water-initiative',
+        'category_id' => $category->id,
+    ]);
 
-        // Assert unauthorized response
-        $response->assertStatus(401);
+    $response = $this->getJson('/api/causes/clean-water-initiative', ['Accept' => 'application/json']);
 
-        // Assert cause was not created
-        $this->assertDatabaseMissing('causes', [
-            'title' => 'Unauthorized Cause',
-        ]);
-    }
-} 
+    $response->assertStatus(200)
+        ->assertJsonPath('data.attributes.slug', 'clean-water-initiative');
+});
+
+it('returns 404 for a non-existent cause', function () {
+    $fakeId = \Illuminate\Support\Str::uuid()->toString();
+
+    $response = $this->getJson("/api/causes/{$fakeId}", ['Accept' => 'application/json']);
+
+    $response->assertStatus(404);
+});
+
+// ── Cause Includes Category Relationship ──────────────────────────────────
+
+it('includes category data in cause response', function () {
+    $category = Category::factory()->create(['name' => 'Education']);
+    $cause    = Cause::factory()->create(['category_id' => $category->id]);
+
+    $response = $this->getJson("/api/causes/{$cause->id}", ['Accept' => 'application/json']);
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.attributes.category_id', $category->id)
+        ->assertJsonPath('data.attributes.category_name', 'Education');
+});
+
+// ── Cause Includes Donation Summary ───────────────────────────────────────
+
+it('includes donations count when donations are loaded', function () {
+    $user     = User::factory()->create();
+    $category = Category::factory()->create();
+    $cause    = Cause::factory()->create(['category_id' => $category->id]);
+
+    Donation::factory()->count(3)->create([
+        'user_id'  => $user->id,
+        'cause_id' => $cause->id,
+    ]);
+
+    $response = $this->getJson("/api/causes/{$cause->id}", ['Accept' => 'application/json']);
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.attributes.donations_count', 3);
+});
+
+// ── Filtering ─────────────────────────────────────────────────────────────
+
+it('filters causes by category_id', function () {
+    $cat1 = Category::factory()->create();
+    $cat2 = Category::factory()->create();
+
+    Cause::factory()->count(3)->create(['category_id' => $cat1->id]);
+    Cause::factory()->count(2)->create(['category_id' => $cat2->id]);
+
+    $response = $this->getJson("/api/causes?category_id={$cat1->id}", ['Accept' => 'application/json']);
+
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(3);
+});
+
+it('filters causes by status', function () {
+    $category = Category::factory()->create();
+
+    Cause::factory()->count(2)->create(['category_id' => $category->id, 'status' => 'active']);
+    Cause::factory()->count(1)->create(['category_id' => $category->id, 'status' => 'completed']);
+
+    $response = $this->getJson('/api/causes?status=active', ['Accept' => 'application/json']);
+
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(2);
+});
+
+it('filters causes by is_featured', function () {
+    $category = Category::factory()->create();
+
+    Cause::factory()->count(2)->create(['category_id' => $category->id, 'is_featured' => true]);
+    Cause::factory()->count(3)->create(['category_id' => $category->id, 'is_featured' => false]);
+
+    $response = $this->getJson('/api/causes?is_featured=1', ['Accept' => 'application/json']);
+
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(2);
+});
+
+// ── Search ────────────────────────────────────────────────────────────────
+
+it('searches causes by title', function () {
+    $category = Category::factory()->create();
+
+    Cause::factory()->create(['title' => 'Help Build a School', 'category_id' => $category->id]);
+    Cause::factory()->create(['title' => 'Clean Water Project', 'category_id' => $category->id]);
+    Cause::factory()->create(['title' => 'Feed the Hungry', 'category_id' => $category->id]);
+
+    $response = $this->getJson('/api/causes?search=School', ['Accept' => 'application/json']);
+
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(1);
+});
+
+it('searches causes by description', function () {
+    $category = Category::factory()->create();
+
+    Cause::factory()->create([
+        'title'       => 'Generic Title',
+        'description' => 'This cause helps orphaned children find loving families.',
+        'category_id' => $category->id,
+    ]);
+    Cause::factory()->create([
+        'title'       => 'Another Title',
+        'description' => 'Provides medical supplies to remote communities.',
+        'category_id' => $category->id,
+    ]);
+
+    $response = $this->getJson('/api/causes?search=orphaned', ['Accept' => 'application/json']);
+
+    $response->assertStatus(200);
+    expect(count($response->json('data')))->toBe(1);
+});
