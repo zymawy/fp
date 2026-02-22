@@ -38,8 +38,6 @@ export default function SignUp() {
     try {
       await signUp(email, password, firstName, lastName);
     } catch (err: any) {
-      console.error("Registration error:", err);
-      
       // Handle specific error messages based on the error message
       if (err.message && err.message.includes('User already exists')) {
         setError(t('auth.errors.userExists'));

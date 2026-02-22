@@ -63,30 +63,25 @@ class CentrifugeClient {
         const centrifugoPort = import.meta.env.VITE_CENTRIFUGO_PORT || '8000';
         const wsEndpoint = `${wsProtocol}://${centrifugoHost}:${centrifugoPort}/connection/websocket`;
         
-        console.log('Connecting to Centrifugo at:', wsEndpoint);
-        
         this.client = new Centrifuge(wsEndpoint, {
           token: connectionToken,
         });
         
-        this.client.on('connecting', (ctx) => {
-          console.log('Connecting to Centrifugo...', ctx);
+        this.client.on('connecting', () => {
+          // connecting
         });
-        
-        this.client.on('connected', (ctx) => {
-          console.log('Connected to Centrifugo', ctx);
+
+        this.client.on('connected', () => {
           this.isInitialized = true;
           resolve();
         });
-        
-        this.client.on('disconnected', (ctx) => {
-          console.log('Disconnected from Centrifugo', ctx);
+
+        this.client.on('disconnected', () => {
           this.isInitialized = false;
         });
-        
+
         this.client.on('error', (ctx) => {
           const error = new Error(`Centrifugo error: ${JSON.stringify(ctx)}`);
-          console.error(error);
           this.initializeErrors.push(error);
           
           if (!this.isInitialized) {
@@ -97,7 +92,6 @@ class CentrifugeClient {
         // Connect to Centrifugo
         this.client.connect();
       } catch (error) {
-        console.error('Failed to initialize Centrifugo:', error);
         this.connectionPromise = null;
         this.initializeErrors.push(error instanceof Error ? error : new Error(String(error)));
         reject(error);
@@ -139,7 +133,6 @@ class CentrifugeClient {
           
           return subscriptionToken;
         } catch (error) {
-          console.error(`Failed to get subscription token for ${causeId}:`, error);
           throw error;
         }
       };
@@ -151,20 +144,19 @@ class CentrifugeClient {
       
       sub.on('publication', callback);
       
-      sub.on('subscribed', (ctx) => {
-        console.log(`Subscribed to ${channel}`, ctx);
+      sub.on('subscribed', () => {
+        // subscribed
       });
-      
-      sub.on('error', (ctx) => {
-        console.error(`Subscription error for ${channel}:`, ctx);
+
+      sub.on('error', () => {
+        // subscription error handled by error callback
       });
       
       sub.subscribe();
       
       this.subscriptions.set(channel, { sub, count: 1 });
       return () => this.unsubscribe(channel, callback);
-    } catch (error) {
-      console.error(`Failed to subscribe to cause ${causeId}:`, error);
+    } catch {
       return () => {};
     }
   }

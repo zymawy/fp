@@ -47,27 +47,9 @@ export function useDonations() {
       }
 
       try {
-        console.log('Fetching donations for user:', user?.id);
-        
         // Use the API client to fetch donations
         const data = await api.donations.getUserDonations();
-        
-        console.log('Raw donations response:', data);
-        console.log('Donations response type:', typeof data);
-        console.log('Is array?', Array.isArray(data));
-        if (typeof data === 'object' && data !== null) {
-          console.log('Object keys:', Object.keys(data));
-          if ('data' in data) {
-            console.log('Has data property, data type:', typeof data.data);
-            console.log('Is data an array?', Array.isArray(data.data));
-          }
-          if ('included' in data) {
-            console.log('Has included property');
-          }
-        }
-        
-        console.log('Donations fetched:', data);
-        
+
         // Check if data is in JSON:API format with included resources
         if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
           // Extract donations from data array
@@ -143,12 +125,10 @@ export function useDonations() {
             status: donation.status || donation.payment_status || 'completed',
           })));
         } else {
-          console.log('No donations found or unexpected format:', data);
           setDonations([]);
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error('Error fetching donations:', errorMsg);
         setError(`Error fetching donations: ${errorMsg}`);
         
         toast({

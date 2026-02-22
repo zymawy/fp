@@ -38,17 +38,11 @@ export function useAchievements() {
       }
 
       try {
-        console.log('Fetching achievements for user:', user.id);
-        
         // Use the API client to fetch achievements with proper endpoint
         const data = await api.achievements.list();
-        
-        console.log('Raw achievements response:', data);
-        
+
         // Handle the JSON:API format with included resources
         if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
-          console.log('Processing achievements JSON:API format');
-          
           // Create a map of included resources by id for easy lookup
           const includedMap = new Map<string, IncludedResource>();
           
@@ -93,21 +87,17 @@ export function useAchievements() {
             };
           });
           
-          console.log('Processed achievements:', achievementsData);
           setAchievements(achievementsData);
-        } 
+        }
         // Handle array response format (fallback)
         else if (Array.isArray(data) && data.length > 0) {
-          console.log('Processing achievements array format');
           setAchievements(data);
         } else {
-          console.log('No achievements found or unexpected format:', data);
           setAchievements([]);
         }
-        
+
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching achievements:', error);
+      } catch {
         setAchievements([]);
         setLoading(false);
       }

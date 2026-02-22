@@ -57,7 +57,6 @@ export function EditProfileDialog() {
     const file = e.target.files?.[0];
     if (file) {
       setError(null);
-      console.log('File selected:', file.name, file.type, file.size);
 
       if (file.size > MAX_FILE_SIZE) {
         setError(t('profile.avatar.sizeError'));
@@ -74,45 +73,31 @@ export function EditProfileDialog() {
         const reader = new FileReader();
         reader.onloadend = () => {
           setPreviewImage(reader.result as string);
-          console.log('Preview image created');
         };
         reader.readAsDataURL(file);
 
-        console.log('Uploading file to server...');
         // Use API wrapper to upload avatar
         const response = await api.profile.uploadAvatar(file);
-        console.log('Upload response:', response);
-        
+
         if (response && response.success && response.url) {
-          console.log('Upload successful, new avatar URL:', response.url);
           setFormData(prev => ({ ...prev, avatar_url: response.url }));
-          
+
           // Update localStorage session data with the new avatar URL
           try {
             const storedUser = localStorage.getItem('session');
             if (storedUser) {
               const userData = JSON.parse(storedUser);
-              // Update the avatar_url in the user data
               userData.avatar_url = response.url;
-              
-              // Save updated user data back to localStorage
               localStorage.setItem('session', JSON.stringify(userData));
-              
-              // Notify the app about the auth state change
               dispatchAuthStateChangeEvent();
-              
-              console.log('Updated avatar_url in localStorage:', userData);
             }
-          } catch (storageError) {
-            console.error('Error updating localStorage:', storageError);
+          } catch {
             // Continue even if localStorage update fails
           }
         } else {
-          console.error('Upload response format invalid:', response);
           throw new Error(response?.message || t('profile.avatar.uploadError'));
         }
       } catch (error) {
-        console.error('Image upload error:', error);
         if (error instanceof Error) {
           setError(error.message || t('profile.avatar.uploadError'));
         } else {
@@ -149,9 +134,8 @@ export function EditProfileDialog() {
       if (success) {
         setIsOpen(false);
       }
-    } catch (error) {
+    } catch {
       setError(t('profile.updateError'));
-      console.error(error);
     } finally {
       setLoading(false);
     }

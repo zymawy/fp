@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { XCircle, ArrowLeft } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
 
 export default function PaymentError() {
   const navigate = useNavigate();
@@ -13,15 +12,6 @@ export default function PaymentError() {
   const isRtl = i18n.language === 'ar';
   const paymentId = searchParams.get('paymentId');
   
-  // Log payment error for troubleshooting
-  useEffect(() => {
-    if (paymentId) {
-      console.error('Payment error occurred with payment ID:', paymentId);
-    } else {
-      console.error('Payment error occurred without payment ID');
-    }
-  }, [paymentId]);
-
   return (
     <AuthLayout>
       <Card className="w-full max-w-md">

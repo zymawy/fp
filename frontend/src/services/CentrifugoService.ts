@@ -26,17 +26,14 @@ class CentrifugoService {
 
   private async setupConnectionMonitoring(): Promise<void> {
     try {
-      // Initialize the client which will connect automatically
       await centrifugoClient.initialize();
       this.connectionStatus = 'connected';
       this.notifyStatusChange('connected');
-    } catch (error) {
-      console.error('Error initializing Centrifugo client:', error);
+    } catch {
       this.connectionStatus = 'error';
       this.notifyStatusChange('error');
-      
+
       if (this.autoReconnect) {
-        console.log('Will attempt to reconnect in 3 seconds...');
         setTimeout(() => this.connect(), 3000);
       }
     }
@@ -45,21 +42,18 @@ class CentrifugoService {
   public async connect(): Promise<void> {
     if (this.connectionStatus !== 'connected') {
       try {
-        console.log('Attempting to connect to Centrifugo...');
         this.connectionStatus = 'connecting';
         this.notifyStatusChange('connecting');
-        
+
         await centrifugoClient.initialize();
-        
+
         this.connectionStatus = 'connected';
         this.notifyStatusChange('connected');
-      } catch (err) {
-        console.error('Failed to connect to Centrifugo:', err);
+      } catch {
         this.connectionStatus = 'error';
         this.notifyStatusChange('error');
-        
+
         if (this.autoReconnect) {
-          console.log('Will attempt to reconnect in 3 seconds...');
           setTimeout(() => this.connect(), 3000);
         }
       }
@@ -76,43 +70,33 @@ class CentrifugoService {
   
   public async subscribeToCause(causeId: string, onMessage: MessageCallback, onError?: ErrorCallback): Promise<void> {
     const channel = `cause.${causeId}`;
-    
+
     if (this.subscriptions.has(channel)) {
-      console.log(`Already subscribed to ${channel}`);
       return;
     }
-    
+
     try {
       const unsubscribe = await centrifugoClient.subscribeToCause(causeId, (message: any) => {
-        // Handle message format
-        console.log(`Received update for cause ${causeId}:`, message);
-        
         let eventData: DonationUpdateData;
         const publication = message.data || {};
-        
-        // Try to extract the data from various possible formats
+
         if (publication.data) {
-          // Standard Centrifugo format
           eventData = publication.data;
         } else {
-          // Fallback - try to adapt whatever format we got
           eventData = {
             causeId: publication.causeId || publication.cause_id || causeId,
             raisedAmount: publication.raisedAmount || publication.raised_amount || 0,
             progressPercentage: publication.progressPercentage || publication.progress_percentage || 0,
-            donorCount: publication.donorCount || publication.donor_count || publication.donors_count || publication.unique_donors
+            donorCount: publication.donorCount || publication.donor_count || publication.donors_count || publication.unique_donors,
           };
         }
-        
-        console.log(`Processed update for cause ${causeId}:`, eventData);
+
         onMessage(eventData);
       });
-      
+
       this.subscriptions.set(channel, unsubscribe);
-      console.log(`Subscribed to ${channel}`);
     } catch (err) {
-      console.error(`Failed to subscribe to ${channel}:`, err);
-      this.connectionStatus = 'error'; 
+      this.connectionStatus = 'error';
       this.notifyStatusChange('error');
       if (onError) onError(err as Error);
     }
@@ -120,14 +104,13 @@ class CentrifugoService {
   
   public unsubscribeFromCause(causeId: string): void {
     const channel = `cause.${causeId}`;
-    
+
     if (this.subscriptions.has(channel)) {
       const unsubscribe = this.subscriptions.get(channel);
       if (unsubscribe && typeof unsubscribe === 'function') {
         unsubscribe();
       }
       this.subscriptions.delete(channel);
-      console.log(`Unsubscribed from ${channel}`);
     }
   }
   
