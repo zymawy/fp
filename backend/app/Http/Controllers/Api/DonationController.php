@@ -134,7 +134,7 @@ class DonationController extends BaseController
             'payment_method' => $donationData['payment_method'] ?? null,
             'amount' => $donationData['amount'],
             'currency_code' => $donationData['currency_code'] ?? config('services.myfatoorah.display_currency', 'USD'),
-            'status' => 'processing',
+            'payment_status' => 'processing',
             'payment_data' => $donationData['payment_data'] ?? [],
         ];
 
@@ -145,6 +145,10 @@ class DonationController extends BaseController
 
         // Set default payment status
         $donationData['payment_status'] = 'processing';
+
+        // Calculate total_amount (amount + processing_fee if covering fees)
+        $processingFee = $donationData['processing_fee'] ?? 0;
+        $donationData['total_amount'] = $donationData['amount'] + $processingFee;
 
         // Create the donation
         $donation = Donation::create($donationData);
@@ -174,7 +178,7 @@ class DonationController extends BaseController
         $transaction->update([
             'transaction_id' => $paymentResult['InvoiceId'] ?? null,
             'payment_method' => $paymentMethodId,
-            'status' => 'initiated',
+            'payment_status' => 'initiated',
             'payment_data' => array_merge($transaction->payment_data ?? [], [
                 'payment_url' => $paymentResult['PaymentURL'] ?? null,
                 'invoice_id' => $paymentResult['InvoiceId'] ?? null,
@@ -320,7 +324,7 @@ class DonationController extends BaseController
 
             if ($transaction) {
                 $transaction->update([
-                    'status' => $paymentStatus['IsSuccess'] ? 'completed' : 'failed',
+                    'payment_status' => $paymentStatus['IsSuccess'] ? 'completed' : 'failed',
                     'payment_data' => array_merge($transaction->payment_data ?? [], [
                         'payment_status' => $paymentStatus,
                     ]),
