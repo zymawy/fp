@@ -13,8 +13,8 @@ use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 |--------------------------------------------------------------------------
 |
 | Covers: listing donations, viewing a single donation, creating donations,
-| validation rules, and filtering. The donation store endpoint is currently
-| public (per routes/api.php) but uses MyFatoorah service which we mock.
+| validation rules, and filtering. All donation endpoints require JWT auth.
+| The store endpoint uses MyFatoorah service which we mock.
 |
 */
 
@@ -62,7 +62,7 @@ it('lists donations with pagination', function () {
         'cause_id' => $cause->id,
     ]);
 
-    $response = $this->getJson('/api/donations', ['Accept' => 'application/json']);
+    $response = $this->getJson('/api/donations', donationHeaders($user));
 
     $response->assertStatus(200)
         ->assertJsonStructure(['data']);
@@ -76,7 +76,7 @@ it('filters donations by user_id', function () {
     Donation::factory()->count(2)->create(['user_id' => $user1->id, 'cause_id' => $cause->id]);
     Donation::factory()->count(3)->create(['user_id' => $user2->id, 'cause_id' => $cause->id]);
 
-    $response = $this->getJson("/api/donations?user_id={$user1->id}", ['Accept' => 'application/json']);
+    $response = $this->getJson("/api/donations?user_id={$user1->id}", donationHeaders($user1));
 
     $response->assertStatus(200);
     $data = $response->json('data');
@@ -91,7 +91,7 @@ it('filters donations by cause_id', function () {
     Donation::factory()->count(2)->create(['user_id' => $user->id, 'cause_id' => $cause1->id]);
     Donation::factory()->count(4)->create(['user_id' => $user->id, 'cause_id' => $cause2->id]);
 
-    $response = $this->getJson("/api/donations?cause_id={$cause1->id}", ['Accept' => 'application/json']);
+    $response = $this->getJson("/api/donations?cause_id={$cause1->id}", donationHeaders($user));
 
     $response->assertStatus(200);
     $data = $response->json('data');
@@ -109,7 +109,7 @@ it('filters donations by payment_status', function () {
         'user_id' => $user->id, 'cause_id' => $cause->id, 'payment_status' => 'pending',
     ]);
 
-    $response = $this->getJson('/api/donations?payment_status=completed', ['Accept' => 'application/json']);
+    $response = $this->getJson('/api/donations?payment_status=completed', donationHeaders($user));
 
     $response->assertStatus(200);
     $data = $response->json('data');
@@ -127,7 +127,7 @@ it('shows a single donation by id', function () {
         'amount'   => 150.00,
     ]);
 
-    $response = $this->getJson("/api/donations/{$donation->id}", ['Accept' => 'application/json']);
+    $response = $this->getJson("/api/donations/{$donation->id}", donationHeaders($user));
 
     $response->assertStatus(200)
         ->assertJsonPath('data.id', $donation->id);
@@ -136,7 +136,8 @@ it('shows a single donation by id', function () {
 it('returns 404 for a non-existent donation', function () {
     $fakeId = \Illuminate\Support\Str::uuid()->toString();
 
-    $response = $this->getJson("/api/donations/{$fakeId}", ['Accept' => 'application/json']);
+    $user = User::factory()->create();
+    $response = $this->getJson("/api/donations/{$fakeId}", donationHeaders($user));
 
     $response->assertStatus(404);
 });
@@ -165,7 +166,7 @@ it('accepts valid donation payload through store validation', function () {
         'is_anonymous'      => false,
         'cover_fees'        => false,
         'payment_method_id' => 'pm_test',
-    ], ['Accept' => 'application/json']);
+    ], donationHeaders($user));
 
     // Verify the request passes validation (not 422).
     expect($response->status())->not->toBe(422);
@@ -175,13 +176,14 @@ it('rejects donation creation with a non-existent cause', function () {
     $mockService = Mockery::mock(MyFatoorahService::class);
     $this->app->instance(MyFatoorahService::class, $mockService);
 
+    $user   = User::factory()->create();
     $fakeId = \Illuminate\Support\Str::uuid()->toString();
 
     $response = $this->postJson('/api/donations', [
         'cause_id'     => $fakeId,
         'amount'       => 100.00,
         'total_amount' => 100.00,
-    ], ['Accept' => 'application/json']);
+    ], donationHeaders($user));
 
     $response->assertStatus(422);
 });
@@ -190,10 +192,12 @@ it('rejects donation creation when cause_id is missing', function () {
     $mockService = Mockery::mock(MyFatoorahService::class);
     $this->app->instance(MyFatoorahService::class, $mockService);
 
+    $user = User::factory()->create();
+
     $response = $this->postJson('/api/donations', [
         'amount'       => 100.00,
         'total_amount' => 100.00,
-    ], ['Accept' => 'application/json']);
+    ], donationHeaders($user));
 
     $response->assertStatus(422);
 });

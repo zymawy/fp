@@ -195,21 +195,20 @@ it('denies non-admin access to financial reports', function () {
     $response->assertStatus(403);
 });
 
-// ── Admin Panel Stats (public endpoint, no auth middleware) ──────────────
+// ── Admin Panel Stats (requires admin auth) ─────────────────────────────
 
-it('returns admin panel dashboard stats', function () {
-    // Create some test data
-    $user     = User::factory()->create();
+it('returns admin panel dashboard stats for admin user', function () {
+    $admin    = createAdminUser();
     $category = Category::factory()->create();
     $cause    = Cause::factory()->create(['category_id' => $category->id]);
 
     Donation::factory()->count(3)->create([
-        'user_id'  => $user->id,
+        'user_id'  => $admin->id,
         'cause_id' => $cause->id,
         'amount'   => 100.00,
     ]);
 
-    $response = $this->getJson('/api/admin/dashboard/stats', ['Accept' => 'application/json']);
+    $response = $this->getJson('/api/admin/dashboard/stats', adminJwtHeaders($admin));
 
     $response->assertStatus(200)
         ->assertJsonStructure([
