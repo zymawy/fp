@@ -36,12 +36,12 @@ pdf_options:
 # Table of Contents
 
 - **Abstract**
-- **Chapter 1: Introduction**
+- **Chapter 1: Introduction (739/1000 words)**
   - 1.1 Project Overview
   - 1.2 Motivation
   - 1.3 Research Objectives
   - 1.4 Project Scope
-- **Chapter 2: Literature Review**
+- **Chapter 2: Literature Review (1358/2500 words)**
   - 2.1 The Intersection of Technology and Charitable Giving
   - 2.2 Transparency as a Driver of Donor Trust
   - 2.3 User Experience Design in Non-Profit Platforms
@@ -50,7 +50,7 @@ pdf_options:
   - 2.6 Gamification and Behavioural Design
   - 2.7 Localisation and Accessibility
   - 2.8 Summary of Gaps in Literature and Practice
-- **Chapter 3: System Design and Architecture**
+- **Chapter 3: System Design and Architecture (1926/2000 words)**
   - 3.1 System Overview
   - 3.2 Database Design
   - 3.3 API Design
@@ -59,7 +59,7 @@ pdf_options:
   - 3.6 Real-Time Architecture
   - 3.7 Docker Compose Infrastructure
   - 3.8 Internationalisation Design
-- **Chapter 4: Implementation**
+- **Chapter 4: Implementation (1948/2500 words)**
   - 4.1 Technology Stack
   - 4.2 Backend Implementation
   - 4.3 Frontend Implementation
@@ -68,7 +68,7 @@ pdf_options:
   - 4.6 Security Implementation
   - 4.7 Docker Compose Deployment
   - 4.8 Summary
-- **Chapter 5: Evaluation**
+- **Chapter 5: Evaluation (1830/2500 words)**
   - 5.1 Evaluation Methodology
   - 5.2 Automated Test Results
   - 5.3 Security Assessment
@@ -76,7 +76,7 @@ pdf_options:
   - 5.5 Functional Evaluation
   - 5.6 Limitations
   - 5.7 Comparison with Research Objectives
-- **Chapter 6: Conclusion**
+- **Chapter 6: Conclusion (800/1000 words)**
   - 6.1 Summary of Achievements
   - 6.2 Critical Reflection
   - 6.3 Personal Learning
@@ -92,9 +92,11 @@ This report presents the design, implementation, and evaluation of Enaam, a full
 
 <div style="page-break-after: always;"></div>
 
-# Chapter 1: Introduction
+# Chapter 1: Introduction (739/1000 words)
 
 ## 1.1 Project Overview
+
+This project follows **Project Idea Title 1: A Non-Profit Web Application**. The complete source code is publicly available at: [https://github.com/zymawy/fp](https://github.com/zymawy/fp).
 
 Enaam is a full-stack web-based charitable donation platform designed to address deficiencies in transparency, accessibility, and donor engagement within online philanthropic giving, with particular emphasis on the Middle East and North Africa (MENA) region. The platform name, derived from the Arabic word meaning "blessings," reflects its core objective: facilitating trustworthy and culturally appropriate digital charitable giving.
 
@@ -146,7 +148,7 @@ Five research objectives guide the design, implementation, and evaluation of Ena
 
 <div style="page-break-after: always;"></div>
 
-# Chapter 2: Literature Review
+# Chapter 2: Literature Review (1358/2500 words)
 
 This chapter surveys the academic and practitioner literature relevant to the design and evaluation of the Enaam charitable donation platform. The review is organised thematically, progressing from the broader landscape of technology-mediated philanthropy to the specific technical and behavioural design decisions that inform the platform's architecture.
 
@@ -218,7 +220,7 @@ The central gap that Enaam addresses is the absence of a platform simultaneously
 
 <div style="page-break-after: always;"></div>
 
-# Chapter 3: System Design and Architecture
+# Chapter 3: System Design and Architecture (1926/2000 words)
 
 ## 3.1 System Overview
 
@@ -386,7 +388,7 @@ The React SPA implements internationalisation using the `react-i18next` library 
 
 <div style="page-break-after: always;"></div>
 
-# Chapter 4: Implementation
+# Chapter 4: Implementation (1948/2500 words)
 
 This chapter presents the implementation of the Enaam charitable donation platform, detailing the technology choices and engineering decisions that translate the system design described in Chapter 3 into a working product.
 
@@ -666,7 +668,7 @@ This chapter has presented the implementation of the Enaam platform across its t
 
 <div style="page-break-after: always;"></div>
 
-# Chapter 5: Evaluation
+# Chapter 5: Evaluation (1830/2500 words)
 
 ## 5.1 Evaluation Methodology
 
@@ -770,7 +772,7 @@ All five research objectives have been achieved, as evidenced by the combination
 
 <div style="page-break-after: always;"></div>
 
-# Chapter 6: Conclusion
+# Chapter 6: Conclusion (800/1000 words)
 
 ## 6.1 Summary of Achievements
 
